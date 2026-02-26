@@ -1,0 +1,277 @@
+---
+import PageLayout from "@/layouts/PageLayout.astro";
+import SectionHeading from "@/components/ui/SectionHeading.astro";
+import Button from "@/components/ui/Button.astro";
+const title = "Book Mad Robin — Ceilidh & Early Music in Devon & the Southwest";
+const description =
+  "Check availability and book Mad Robin for your wedding, corporate event, or party. Packages from £800. Based in Exeter, Devon.";
+---
+
+<PageLayout title={title} description={description}>
+  <!-- ======== PAGE HEADER ======== -->
+  <section class="page-header section">
+    <div class="container">
+      <SectionHeading
+        tag="h1"
+        title="Book Us"
+        subtitle="Let's get your guests on the dance floor"
+      />
+    </div>
+  </section>
+
+  <!-- ======== WHAT'S INCLUDED ======== -->
+  <section class="section">
+    <div class="container container--narrow">
+      <SectionHeading title="What's Included" />
+      <div class="included-grid">
+        <div class="included-item">
+          <strong>Live Music</strong>
+          <p>A 4-piece band playing lively traditional and contemporary ceilidh tunes</p>
+        </div>
+        <div class="included-item">
+          <strong>Experienced Caller</strong>
+          <p>Every dance is called and taught — your guests will be dancing in minutes</p>
+        </div>
+        <div class="included-item">
+          <strong>PA System</strong>
+          <p>Professional sound system suitable for your venue size</p>
+        </div>
+        <div class="included-item">
+          <strong>Travel</strong>
+          <p>Travel within Devon included. We cover the Southwest and beyond — just ask</p>
+        </div>
+        <div class="included-item">
+          <strong>Early Music Sets</strong>
+          <p>Playford and English folk tunes available as a concert or ambient performance</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== ENQUIRY FORM ======== -->
+  <section class="section section--warm" id="enquiry-form">
+    <div class="container container--narrow">
+      <SectionHeading
+        title="Get in Touch"
+        subtitle="Tell us about your event and we'll get back to you within 24 hours"
+      />
+
+      <form
+        name="enquiry"
+        method="POST"
+        data-netlify="true"
+        netlify-honeypot="bot-field"
+        action="/success/"
+        class="enquiry-form"
+      >
+        <!-- Honeypot -->
+        <p class="sr-only">
+          <label>
+            Don't fill this out: <input name="bot-field" />
+          </label>
+        </p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required autocomplete="name" />
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required autocomplete="email" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="event-date">Event Date</label>
+          <input type="date" id="event-date" name="event-date" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="event-type">Event Type</label>
+            <select id="event-type" name="event-type">
+              <option value="">Select...</option>
+              <option value="Wedding">Wedding</option>
+              <option value="Private">Private Event</option>
+              <option value="Private Party">Private Party</option>
+              <option value="Public Event">Public Event</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="guests">Estimated Guest Count</label>
+            <input type="number" id="guests" name="guests" min="1" max="1000" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="venue">Venue / Location</label>
+          <input type="text" id="venue" name="venue" />
+        </div>
+
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" rows="5" required
+            placeholder="Tell us about your event — what are you looking for?"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="referral">How did you hear about us?</label>
+          <select id="referral" name="referral">
+            <option value="">Select...</option>
+            <option value="Google">Google search</option>
+            <option value="Social Media">Social media</option>
+            <option value="Friend/Family">Friend or family</option>
+            <option value="Saw Us Live">Saw us at an event</option>
+            <option value="Wedding Directory">Wedding directory</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <Button variant="primary" size="lg">Send Enquiry</Button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ======== CONTACT INFO ======== -->
+  <section class="section">
+    <div class="container container--narrow contact-strip">
+      <div class="contact-item">
+        <strong>Email us</strong>
+        <a href="mailto:madrobinband@gmail.com" class="contact-link"
+          >madrobinband@gmail.com</a
+        >
+      </div>
+      <div class="contact-item">
+        <strong>Call us</strong>
+        <a href="tel:+447849035551" class="contact-link">+44 7849 035551</a>
+        <p class="response-promise">Please leave a message</p>
+      </div>
+      <div class="contact-item">
+        <p class="response-promise">We respond within 24 hours</p>
+      </div>
+    </div>
+  </section>
+</PageLayout>
+
+<style>
+  /* ---- Page header ---- */
+  .page-header {
+    padding-bottom: 0;
+  }
+
+  /* ---- What's included ---- */
+  .included-grid {
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  .included-item {
+    padding: var(--space-lg);
+    border-left: 3px solid var(--color-accent-gold);
+  }
+
+  .included-item strong {
+    display: block;
+    margin-bottom: var(--space-xs);
+    font-size: var(--text-lg);
+  }
+
+  .included-item p {
+    font-size: var(--text-sm);
+    margin: 0;
+  }
+
+  /* ---- Enquiry form ---- */
+  .enquiry-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .form-row {
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .form-group label {
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
+
+  .required {
+    color: var(--color-accent-terracotta);
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.75rem 1rem;
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: var(--text-base);
+    transition: border-color var(--transition-fast);
+    min-height: 44px;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--color-accent-gold);
+    outline: none;
+  }
+
+  .form-group textarea {
+    resize: vertical;
+  }
+
+  /* ---- Contact strip ---- */
+  .contact-strip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+    text-align: center;
+  }
+
+  .contact-link {
+    display: block;
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--color-accent-gold);
+    margin-top: var(--space-xs);
+  }
+
+  .response-promise {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+
+  /* ---- Responsive ---- */
+  @media (min-width: 768px) {
+    .included-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .form-row {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .contact-strip {
+      flex-direction: row;
+      justify-content: center;
+      gap: var(--space-3xl);
+    }
+  }
+</style>

@@ -1,0 +1,106 @@
+---
+/* ============================================
+   Button — Primary / Secondary / Outline
+   Renders as <a> when href is provided,
+   otherwise <button>.
+   ============================================ */
+
+interface Props {
+  href?: string;
+  variant?: "primary" | "secondary" | "outline";
+  size?: "sm" | "md" | "lg";
+  class?: string;
+  [key: string]: any;
+}
+
+const {
+  href,
+  variant = "primary",
+  size = "md",
+  class: className = "",
+  ...rest
+} = Astro.props;
+
+const Tag = href ? "a" : "button";
+const classes = `btn btn--${variant} btn--${size} ${className}`.trim();
+---
+
+<Tag href={href} class={classes} {...rest}>
+  <slot />
+</Tag>
+
+<style>
+  .btn {
+    display: inline-block;
+    font-family: var(--font-body);
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition:
+      background-color var(--transition-fast),
+      color var(--transition-fast),
+      border-color var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .btn:active {
+    transform: translateY(0);
+  }
+
+  /* Variants */
+  .btn--primary {
+    background-color: var(--color-accent-gold);
+    color: var(--color-text-on-accent);
+  }
+
+  .btn--primary:hover {
+    background-color: var(--color-accent-gold-hover);
+    color: var(--color-text-on-accent);
+  }
+
+  .btn--secondary {
+    background-color: var(--color-bg-card);
+    color: var(--color-text-primary);
+    border-color: var(--color-border);
+  }
+
+  .btn--secondary:hover {
+    background-color: var(--color-bg-card-hover);
+    border-color: var(--color-accent-gold);
+    color: var(--color-accent-gold);
+  }
+
+  .btn--outline {
+    background-color: transparent;
+    color: var(--color-accent-gold);
+    border-color: var(--color-accent-gold);
+  }
+
+  .btn--outline:hover {
+    background-color: var(--color-accent-gold);
+    color: var(--color-bg-primary);
+  }
+
+  /* Sizes */
+  .btn--sm {
+    font-size: var(--text-sm);
+    padding: 0.5rem 1.2rem;
+  }
+
+  .btn--md {
+    font-size: var(--text-base);
+    padding: 0.75rem 1.8rem;
+  }
+
+  .btn--lg {
+    font-size: var(--text-lg);
+    padding: 1rem 2.4rem;
+  }
+</style>

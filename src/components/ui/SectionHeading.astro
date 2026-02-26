@@ -1,0 +1,58 @@
+---
+/* ============================================
+   SectionHeading — Heading + subtitle + gold accent
+   ============================================ */
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  align?: "left" | "center";
+  tag?: "h1" | "h2" | "h3";
+}
+
+const { title, subtitle, align = "center", tag: Tag = "h2" } = Astro.props;
+---
+
+<div class:list={["section-heading", `section-heading--${align}`]}>
+  <Tag>{title}</Tag>
+  <span class="accent-line" aria-hidden="true"></span>
+  {subtitle && <p class="subtitle">{subtitle}</p>}
+</div>
+
+<style>
+  .section-heading {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .section-heading--center {
+    text-align: center;
+  }
+
+  .section-heading--left {
+    text-align: left;
+  }
+
+  .accent-line {
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: var(--color-accent-gold);
+    margin-top: var(--space-md);
+    border-radius: var(--radius-full);
+  }
+
+  .section-heading--center .accent-line {
+    margin-inline: auto;
+  }
+
+  .subtitle {
+    margin-top: var(--space-md);
+    font-size: var(--text-lg);
+    color: var(--color-text-secondary);
+    max-width: 600px;
+  }
+
+  .section-heading--center .subtitle {
+    margin-inline: auto;
+  }
+</style>

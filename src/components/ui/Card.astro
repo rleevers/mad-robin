@@ -1,0 +1,68 @@
+---
+/* ============================================
+   Card — Reusable content card with optional image
+   ============================================ */
+
+interface Props {
+  title?: string;
+  href?: string;
+  class?: string;
+}
+
+const { title, href, class: className = "" } = Astro.props;
+const Tag = href ? "a" : "div";
+---
+
+<Tag href={href} class={`card ${className}`.trim()}>
+  {Astro.slots.has("image") && (
+    <div class="card-image">
+      <slot name="image" />
+    </div>
+  )}
+  <div class="card-body">
+    {title && <h3 class="card-title">{title}</h3>}
+    <slot />
+  </div>
+</Tag>
+
+<style>
+  .card {
+    display: block;
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition:
+      border-color var(--transition-base),
+      transform var(--transition-base),
+      box-shadow var(--transition-base);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  a.card:hover {
+    border-color: var(--color-accent-gold);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .card-image {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+  }
+
+  .card-image :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .card-body {
+    padding: var(--space-lg);
+  }
+
+  .card-title {
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-sm);
+  }
+</style>

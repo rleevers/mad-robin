@@ -1,0 +1,32 @@
+---
+/* ============================================
+   PlaceholderImage — Styled fallback for missing images
+   ============================================ */
+
+interface Props {
+  alt: string;
+  icon?: string;
+  aspectRatio?: string;
+}
+
+const { alt, icon = "🎵", aspectRatio = "16 / 10" } = Astro.props;
+---
+
+<div class="placeholder" style={`aspect-ratio: ${aspectRatio};`} role="img" aria-label={alt}>
+  <span class="placeholder-icon">{icon}</span>
+</div>
+
+<style>
+  .placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--color-bg-secondary), var(--color-bg-tertiary));
+    width: 100%;
+  }
+
+  .placeholder-icon {
+    font-size: 2.5rem;
+    opacity: 0.4;
+  }
+</style>

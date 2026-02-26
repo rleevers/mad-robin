@@ -1,0 +1,199 @@
+---
+/* ============================================
+   Footer — CTA strip, links, contact, copyright
+   ============================================ */
+---
+
+<footer class="site-footer">
+  <!-- Mini CTA strip -->
+  <div class="footer-cta">
+    <div class="container footer-cta-inner">
+      <p class="footer-cta-text">
+        Ready to get your guests on the dance floor?
+      </p>
+      <a href="/book-us/" class="btn btn--primary">Book Us</a>
+    </div>
+  </div>
+
+  <div class="footer-main">
+    <div class="container footer-grid">
+      <!-- Brand -->
+      <div class="footer-col">
+        <p class="footer-brand">Mad Robin</p>
+        <p class="footer-tagline">
+          Live English ceilidh music for weddings, parties & events in Devon and
+          the Southwest.
+        </p>
+      </div>
+
+      <!-- Quick links -->
+      <div class="footer-col">
+        <h4 class="footer-heading">Quick Links</h4>
+        <nav aria-label="Footer navigation">
+          <a href="/#what-we-do" class="footer-link">What We Do</a>
+          <a href="/#gallery" class="footer-link">Gallery</a>
+          <a href="/#about" class="footer-link">About the Band</a>
+          <a href="/#what-is-a-ceilidh" class="footer-link">What is a Ceilidh?</a>
+          <a href="/book-us/" class="footer-link">Book Us</a>
+        </nav>
+      </div>
+
+      <!-- Contact -->
+      <div class="footer-col">
+        <h4 class="footer-heading">Get in Touch</h4>
+        <a href="mailto:madrobinband@gmail.com" class="footer-link"
+          >madrobinband@gmail.com</a
+        >
+        <a href="tel:+447849035551" class="footer-link">+44 7849 035551</a>
+        <p class="footer-small">Please leave a message</p>
+        <p class="footer-small">We respond within 24 hours</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="container footer-bottom-inner">
+      <p>&copy; {new Date().getFullYear()} Mad Robin Ceilidh Band. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: auto;
+  }
+
+  /* CTA strip */
+  .footer-cta {
+    background-color: var(--color-accent-gold);
+    padding: var(--space-xl) 0;
+  }
+
+  .footer-cta-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    text-align: center;
+  }
+
+  .footer-cta-text {
+    font-family: var(--font-heading);
+    font-size: var(--text-xl);
+    color: var(--color-text-on-accent);
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .footer-cta .btn--primary {
+    background-color: var(--color-text-on-accent);
+    color: var(--color-accent-gold);
+  }
+
+  .footer-cta .btn--primary:hover {
+    background-color: var(--color-bg-primary);
+  }
+
+  /* Main footer */
+  .footer-main {
+    background-color: var(--color-bg-secondary);
+    padding: var(--space-3xl) 0;
+  }
+
+  .footer-grid {
+    display: grid;
+    gap: var(--space-2xl);
+  }
+
+  .footer-brand {
+    font-family: var(--font-heading);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-sm);
+  }
+
+  .footer-tagline {
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+  }
+
+  .footer-heading {
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-accent-gold);
+    margin-bottom: var(--space-md);
+  }
+
+  .footer-col nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .footer-link {
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+    transition: color var(--transition-fast);
+  }
+
+  .footer-link:hover {
+    color: var(--color-accent-gold);
+  }
+
+  .footer-small {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    margin-top: var(--space-sm);
+  }
+
+  /* Bottom bar */
+  .footer-bottom {
+    background-color: var(--color-bg-footer-bottom);
+    padding: var(--space-md) 0;
+  }
+
+  .footer-bottom-inner {
+    text-align: center;
+  }
+
+  .footer-bottom p {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  /* Button (inline) */
+  .btn {
+    display: inline-block;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    padding: 0.7rem 1.6rem;
+    transition:
+      background-color var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .btn--primary {
+    background-color: var(--color-accent-gold);
+    color: var(--color-text-on-accent);
+  }
+
+  @media (min-width: 768px) {
+    .footer-cta-inner {
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    .footer-grid {
+      grid-template-columns: 2fr 1fr 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Block CMS admin
+Disallow: /admin/
+
+Sitemap: https://madrobinceilidh.co.uk/sitemap-index.xml

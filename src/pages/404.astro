@@ -1,0 +1,54 @@
+---
+import PageLayout from "@/layouts/PageLayout.astro";
+import Button from "@/components/ui/Button.astro";
+---
+
+<PageLayout
+  title="Page Not Found — Mad Robin Ceilidh Band"
+  description="Sorry, this page doesn't exist."
+  noindex={true}
+>
+  <section class="error-section">
+    <div class="container container--narrow error-inner">
+      <h1>404</h1>
+      <p>Sorry, this page doesn't exist. Maybe it's off doing a Strip the Willow somewhere.</p>
+      <div class="error-links">
+        <Button href="/">Back to Home</Button>
+        <Button href="/book-us/" variant="outline">Book Us</Button>
+      </div>
+    </div>
+  </section>
+</PageLayout>
+
+<style>
+  .error-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+  }
+
+  .error-inner {
+    text-align: center;
+    padding-block: var(--space-4xl);
+  }
+
+  h1 {
+    font-size: clamp(4rem, 15vw, 8rem);
+    color: var(--color-accent-gold);
+    opacity: 0.3;
+    margin-bottom: var(--space-md);
+  }
+
+  p {
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-xl);
+  }
+
+  .error-links {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+</style>

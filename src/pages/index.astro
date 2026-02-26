@@ -1,0 +1,1183 @@
+---
+import PageLayout from "@/layouts/PageLayout.astro";
+import SectionHeading from "@/components/ui/SectionHeading.astro";
+import Button from "@/components/ui/Button.astro";
+import PlaceholderImage from "@/components/ui/PlaceholderImage.astro";
+import { getCollection, render } from "astro:content";
+
+// Fetch content
+const allTestimonials = await getCollection("testimonials");
+const featuredTestimonials = allTestimonials
+  .filter((t) => t.data.featured)
+  .slice(0, 3);
+
+const allEvents = await getCollection("events");
+const upcomingEvents = allEvents
+  .filter((e) => e.data.date >= new Date())
+  .sort((a, b) => a.data.date.getTime() - b.data.date.getTime())
+  .slice(0, 3);
+
+const allMembers = await getCollection("members");
+const members = allMembers.sort((a, b) => a.data.sortOrder - b.data.sortOrder);
+
+const allGallery = await getCollection("gallery");
+const galleryItems = allGallery.sort(
+  (a, b) => a.data.sortOrder - b.data.sortOrder
+);
+
+const allFaq = await getCollection("faq");
+const faqItems = allFaq.sort((a, b) => a.data.sortOrder - b.data.sortOrder);
+
+const galleryCategories = ["All", "Weddings", "Barn Dances", "Private", "Public"];
+
+const title =
+  "Mad Robin — Live Ceilidh & Early English Music in Devon & the Southwest";
+const description =
+  "Mad Robin are a live English ceilidh band and early music ensemble based in Exeter, Devon. Book us for weddings, private parties & public ceilidhs.";
+
+const jsonLd = JSON.stringify([
+  {
+    "@context": "https://schema.org",
+    "@type": "MusicGroup",
+    name: "Mad Robin Ceilidh Band",
+    url: "https://madrobinceilidh.co.uk",
+    description,
+    genre: ["Ceilidh", "Folk", "English Country Dance", "Early English Music", "Playford"],
+    areaServed: {
+      "@type": "GeoCircle",
+      geoMidpoint: {
+        "@type": "GeoCoordinates",
+        latitude: 50.7184,
+        longitude: -3.5339,
+      },
+      geoRadius: "100 mi",
+    },
+    location: {
+      "@type": "City",
+      name: "Exeter",
+      containedInPlace: {
+        "@type": "AdministrativeArea",
+        name: "Devon",
+      },
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "@id": "https://madrobinceilidh.co.uk/#business",
+    name: "Mad Robin Ceilidh Band",
+    url: "https://madrobinceilidh.co.uk",
+    description,
+    email: "madrobinband@gmail.com",
+    telephone: "+44 7849 035551",
+    areaServed: ["Devon", "Southwest England", "Exeter"],
+    priceRange: "$$",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Exeter",
+      addressRegion: "Devon",
+      addressCountry: "GB",
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: 50.7184,
+      longitude: -3.5339,
+    },
+  },
+]);
+---
+
+<PageLayout title={title} description={description}>
+  <script slot="head" type="application/ld+json" set:html={jsonLd} />
+
+  <!-- ======== HERO ======== -->
+  <section class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content container">
+      <img src="/images/logo.png" alt="Mad Robin" class="hero-logo" width="400" height="300" />
+      <h1 class="sr-only">Mad Robin</h1>
+      <p class="hero-tagline">
+        Live ceilidh & early English music for weddings, parties & events in Devon and
+        the Southwest
+      </p>
+      <Button href="/book-us/" size="lg">Book Us</Button>
+    </div>
+  </section>
+
+  <!-- ======== TRUST BAR ======== -->
+  <section class="trust-bar">
+    <div class="container trust-bar-inner">
+      <span>Serving Devon & the Southwest</span>
+      <span class="trust-divider" aria-hidden="true">&middot;</span>
+      <span>Live caller included</span>
+      <span class="trust-divider" aria-hidden="true">&middot;</span>
+      <span>All dances called — no experience needed</span>
+    </div>
+  </section>
+
+  <!-- ======== WHAT WE DO ======== -->
+  <section class="section" id="what-we-do">
+    <div class="container">
+      <SectionHeading
+        title="What We Do"
+        subtitle="Live ceilidh and early music entertainment for every occasion"
+      />
+      <p class="ceilidh-info-link">
+        New to ceilidh? <a href="#what-is-a-ceilidh">Find out what it's all about &rarr;</a>
+      </p>
+
+      <h3 class="services-subheading">Ceilidhs</h3>
+      <div class="services-grid services-grid--three">
+        <div class="service-card">
+          <a href="/book-us/" class="service-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </a>
+          <h4>Weddings</h4>
+          <p>
+            Get every guest on the dance floor with an unforgettable ceilidh.
+            All dances called — no experience needed, just enthusiasm.
+          </p>
+          <a href="/book-us/" class="service-link">Find out more &rarr;</a>
+        </div>
+        <div class="service-card">
+          <a href="/book-us/" class="service-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </a>
+          <h4>Private Parties</h4>
+          <p>
+            Birthdays, anniversaries, or just a great excuse to celebrate. A
+            ceilidh is the ultimate party — energetic, inclusive, and guaranteed
+            to get everyone dancing.
+          </p>
+          <a href="/book-us/" class="service-link">Find out more &rarr;</a>
+        </div>
+        <div class="service-card">
+          <a href="/book-us/" class="service-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 18V5l12-2v13"/>
+              <circle cx="6" cy="18" r="3"/>
+              <circle cx="18" cy="16" r="3"/>
+            </svg>
+          </a>
+          <h4>Public Ceilidhs</h4>
+          <p>
+            We host seasonal public ceilidhs in Exeter. Come along, meet new
+            people, and dance the night away. All welcome!
+          </p>
+          <a href="/book-us/" class="service-link">Find out more &rarr;</a>
+        </div>
+      </div>
+
+      <h3 class="services-subheading">Performance</h3>
+      <div class="services-grid services-grid--three">
+        <div class="service-card">
+          <a href="/book-us/" class="service-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v6"/>
+              <path d="M9 8h6"/>
+              <path d="M12 8v8"/>
+              <circle cx="12" cy="18" r="3"/>
+            </svg>
+          </a>
+          <h4>Concerts & Festivals</h4>
+          <p>
+            Formal and semi-formal performances at folk festivals, early
+            music festivals, concert halls, and folk clubs. Repertoire from
+            Playford, English folk, and country dance traditions.
+          </p>
+          <a href="/book-us/" class="service-link">Find out more &rarr;</a>
+        </div>
+        <div class="service-card">
+          <a href="/book-us/" class="service-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 22h8"/>
+              <path d="M12 11v11"/>
+              <path d="M12 11a4 4 0 0 0 4-4V3h-3"/>
+              <path d="M9 3v4"/>
+              <path d="M15 3v1"/>
+            </svg>
+          </a>
+          <h4>Events & Functions</h4>
+          <p>
+            Atmospheric live music for dinners, receptions, and garden
+            parties. Background or feature music tailored to the occasion.
+          </p>
+          <a href="/book-us/" class="service-link">Find out more &rarr;</a>
+        </div>
+        <div class="service-card">
+          <a href="/book-us/" class="service-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="8" cy="4" r="2"/>
+              <circle cx="16" cy="4" r="2"/>
+              <path d="M5 10l3 4 2-3"/>
+              <path d="M19 10l-3 4-2-3"/>
+              <path d="M8 14v5l-3 2"/>
+              <path d="M16 14v5l3 2"/>
+              <path d="M8 14l4-2 4 2"/>
+            </svg>
+          </a>
+          <h4>Dance</h4>
+          <p>
+            English country dancing with a caller — Playford balls, barn
+            dances, and historical dance events. Interactive, participatory,
+            everyone on their feet.
+          </p>
+          <a href="/book-us/" class="service-link">Find out more &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== SEE US IN ACTION ======== -->
+  <section class="section section--alt" id="see-us">
+    <div class="container">
+      <SectionHeading
+        title="See Us in Action"
+        subtitle="Watch and listen to get a taste of what we do"
+      />
+      <div class="video-container">
+        <div class="video-placeholder">
+          <div class="video-placeholder-inner">
+            <span class="video-play-icon" aria-hidden="true">&#9654;</span>
+            <p>Showreel coming soon</p>
+            <p class="video-sub">
+              Check back soon for a taste of Mad Robin live
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== GALLERY ======== -->
+  <section class="section" id="gallery">
+    <div class="container">
+      <SectionHeading
+        title="Gallery"
+        subtitle="Photos from our events"
+      />
+
+      <!-- Category filter tabs -->
+      <div class="filter-tabs" role="tablist" aria-label="Gallery categories">
+        {
+          galleryCategories.map((cat) => (
+            <button
+              role="tab"
+              class:list={["filter-tab", { active: cat === "All" }]}
+              data-category={cat}
+              aria-selected={cat === "All" ? "true" : "false"}
+            >
+              {cat}
+            </button>
+          ))
+        }
+      </div>
+
+      <!-- Gallery grid -->
+      <div class="gallery-grid" id="gallery-grid">
+        {
+          galleryItems.length > 0
+            ? galleryItems.map((item) => (
+                <a
+                  href={item.data.image}
+                  class="gallery-item"
+                  data-category={item.data.category}
+                  target="_blank"
+                >
+                  <img
+                    src={item.data.image}
+                    alt={item.data.alt}
+                    loading="lazy"
+                    width="400"
+                    height="300"
+                  />
+                  {item.data.caption && (
+                    <span class="gallery-caption">{item.data.caption}</span>
+                  )}
+                </a>
+              ))
+            : Array.from({ length: 6 }).map((_, i) => (
+                <div class="gallery-placeholder-card" data-category="All">
+                  <PlaceholderImage
+                    alt={`Gallery photo coming soon ${i + 1}`}
+                    aspectRatio="4 / 3"
+                    icon="📷"
+                  />
+                </div>
+              ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== TESTIMONIALS ======== -->
+  {
+    featuredTestimonials.length > 0 && (
+      <section class="section section--warm" id="testimonials">
+        <div class="container">
+          <SectionHeading title="What People Say" />
+          <div class="testimonials-grid">
+            {featuredTestimonials.map(async (t) => {
+              const { Content } = await render(t);
+              return (
+                <blockquote class="testimonial-card">
+                  <div class="testimonial-quote">
+                    <Content />
+                  </div>
+                  <footer class="testimonial-footer">
+                    <cite class="testimonial-name">{t.data.clientName}</cite>
+                    {t.data.venue && (
+                      <span class="testimonial-venue">{t.data.venue}</span>
+                    )}
+                    <span class="testimonial-type">{t.data.eventType}</span>
+                  </footer>
+                </blockquote>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- ======== ABOUT THE BAND ======== -->
+  <section class="section section--alt" id="about">
+    <div class="container">
+      <SectionHeading title="About the Band" />
+
+      <div class="story-text">
+        <p>
+          Mad Robin are a lively 5-piece English ceilidh band with a caller,
+          based in Exeter, Devon. We play weddings, private parties, and host
+          seasonal public ceilidhs across Devon and the Southwest.
+        </p>
+        <p>
+          Alongside our ceilidhs, we also perform early English music — Playford
+          tunes and folk repertoire — at concerts, festivals, and events.
+        </p>
+        <p>
+          What makes a Mad Robin ceilidh special? Every dance is called and
+          taught from scratch by our caller. No experience needed, no partner
+          required — just enthusiasm. Within minutes even the most reluctant
+          dancers are spinning around the floor.
+        </p>
+      </div>
+
+      <div class="members-grid">
+        {
+          members.map(async (member) => {
+            const { Content } = await render(member);
+            return (
+              <div class="member-card">
+                <div class="member-photo">
+                  {member.data.photo ? (
+                    <img
+                      src={member.data.photo}
+                      alt={`${member.data.name} — ${member.data.instrument}`}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <PlaceholderImage
+                      alt={`${member.data.name} — ${member.data.instrument}`}
+                      aspectRatio="1 / 1"
+                      icon="🎵"
+                    />
+                  )}
+                </div>
+                <div class="member-info">
+                  <h3>{member.data.name}</h3>
+                  <p class="member-instrument">{member.data.instrument}</p>
+                  <div class="member-bio">
+                    <Content />
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== WHAT IS A CEILIDH? ======== -->
+  <section class="section" id="what-is-a-ceilidh">
+    <div class="container container--narrow">
+      <SectionHeading
+        title="What is a Ceilidh?"
+        subtitle="Everything you need to know about ceilidh dancing"
+      />
+
+      <div class="intro-text">
+        <p class="pronunciation">
+          <strong>Ceilidh</strong> — pronounced <em>"KAY-lee"</em>
+        </p>
+        <p>
+          A ceilidh is a social gathering with live folk music and group
+          dancing. It's one of the most inclusive and joyful forms of
+          entertainment you can have at an event — everyone dances, from
+          children to grandparents, and no experience is needed whatsoever.
+        </p>
+        <p>
+          The word "ceilidh" comes from the Gaelic for "a visit" or "social
+          gathering." While the tradition has its roots in Scotland and Ireland,
+          English ceilidh (sometimes called "barn dances") draws on a rich
+          tradition of English country dance that goes back centuries.
+        </p>
+      </div>
+    </div>
+
+    <div class="container container--narrow">
+      <h3 class="expect-heading">What to Expect</h3>
+      <div class="expect-grid">
+        <div class="expect-item">
+          <h4>The Caller</h4>
+          <p>
+            Before each dance, the caller explains the moves and walks everyone
+            through a practice run. Then the music starts, and the caller keeps
+            prompting until everyone's got it. It's fun, friendly, and nobody
+            gets left behind.
+          </p>
+        </div>
+        <div class="expect-item">
+          <h4>The Dances</h4>
+          <p>
+            Expect classics like Strip the Willow, Gay Gordons, Virginia Reel,
+            and many more. The dances are sociable — you'll dance with lots of
+            different people throughout the evening, not just your partner.
+          </p>
+        </div>
+        <div class="expect-item">
+          <h4>The Music</h4>
+          <p>
+            Live, energetic folk music played on fiddle, accordion, guitar, and
+            bass. The tempo builds throughout the evening, and the energy is
+            infectious. It's impossible not to tap your feet.
+          </p>
+        </div>
+        <div class="expect-item">
+          <h4>What to Wear</h4>
+          <p>
+            Wear whatever's comfortable — you'll be moving around! Flat shoes
+            or trainers are recommended. Ceilidh dancing can be quite energetic,
+            so layers are a good idea too.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    {
+      faqItems.length > 0 && (
+        <div class="container container--narrow faq-section">
+          <h3 class="expect-heading">Frequently Asked Questions</h3>
+          <div class="faq-list">
+            {faqItems.map(async (item) => {
+              const { Content } = await render(item);
+              return (
+                <details class="faq-item">
+                  <summary class="faq-question">{item.data.question}</summary>
+                  <div class="faq-answer">
+                    <Content />
+                  </div>
+                </details>
+              );
+            })}
+          </div>
+        </div>
+      )
+    }
+  </section>
+
+  <!-- ======== UPCOMING EVENTS ======== -->
+  {
+    upcomingEvents.length > 0 && (
+      <section class="section section--alt" id="events">
+        <div class="container">
+          <SectionHeading
+            title="Upcoming Events"
+            subtitle="Come see us live at a public ceilidh"
+          />
+          <div class="events-grid">
+            {upcomingEvents.map((e) => (
+              <div class="event-card">
+                <div class="event-date-badge">
+                  <span class="event-day">
+                    {e.data.date.getDate()}
+                  </span>
+                  <span class="event-month">
+                    {e.data.date.toLocaleDateString("en-GB", {
+                      month: "short",
+                    })}
+                  </span>
+                </div>
+                <div class="event-info">
+                  <h3>{e.data.title}</h3>
+                  <p class="event-venue">{e.data.venue}</p>
+                  <p class="event-desc">{e.data.description}</p>
+                  {e.data.ticketPrice && (
+                    <p class="event-price">{e.data.ticketPrice}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- ======== CTA BANNER ======== -->
+  <section class="cta-banner">
+    <div class="container cta-banner-inner">
+      <h2>Let's make your event unforgettable</h2>
+      <p>Get in touch to check availability and discuss your event.</p>
+      <Button href="/book-us/" size="lg" variant="outline"
+        >Book Us</Button
+      >
+    </div>
+  </section>
+</PageLayout>
+
+<style>
+  /* ---- Hero ---- */
+  .hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    background: linear-gradient(
+      135deg,
+      var(--color-bg-secondary) 0%,
+      var(--color-bg-tertiary) 50%,
+      var(--color-bg-primary) 100%
+    );
+    overflow: hidden;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 0%,
+      var(--color-hero-vignette) 100%
+    );
+  }
+
+  .hero-content {
+    position: relative;
+    text-align: center;
+    padding-block: var(--space-4xl);
+  }
+
+  .hero-logo {
+    max-width: 360px;
+    height: auto;
+    margin: 0 auto var(--space-lg);
+  }
+
+  @media (min-width: 768px) {
+    .hero-logo {
+      max-width: 460px;
+    }
+  }
+
+  .hero-tagline {
+    font-size: var(--text-xl);
+    color: var(--color-text-secondary);
+    max-width: 600px;
+    margin: 0 auto var(--space-2xl);
+  }
+
+  /* ---- Trust bar ---- */
+  .trust-bar {
+    background-color: var(--color-accent-gold);
+    padding: var(--space-md) 0;
+  }
+
+  .trust-bar-inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-sm) var(--space-md);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--color-text-on-accent);
+    text-align: center;
+  }
+
+  .trust-divider {
+    display: none;
+  }
+
+  /* ---- What We Do ---- */
+  .ceilidh-info-link {
+    text-align: center;
+    margin-top: calc(-1 * var(--space-lg));
+    margin-bottom: var(--space-2xl);
+    font-size: var(--text-base);
+    color: var(--color-text-secondary);
+  }
+
+  .services-subheading {
+    font-size: var(--text-xl);
+    color: var(--color-accent-terracotta);
+    margin-bottom: var(--space-lg);
+    text-align: center;
+  }
+
+  .services-grid {
+    display: grid;
+    gap: var(--space-xl);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .services-grid--three {
+    /* default 1 col, upgraded in media queries */
+  }
+
+  .service-card {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    text-align: center;
+    transition: border-color var(--transition-base);
+  }
+
+  .service-card:hover {
+    border-color: var(--color-accent-gold);
+  }
+
+  .service-icon {
+    display: flex;
+    justify-content: center;
+    color: var(--color-accent-gold);
+    margin-bottom: var(--space-md);
+  }
+
+  .service-card h4 {
+    margin-bottom: var(--space-sm);
+  }
+
+  .service-link {
+    display: inline-block;
+    margin-top: var(--space-md);
+    font-size: var(--text-sm);
+    font-weight: 700;
+  }
+
+  /* ---- Video ---- */
+  .video-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .video-placeholder {
+    aspect-ratio: 16 / 9;
+    background: linear-gradient(
+      135deg,
+      var(--color-bg-tertiary),
+      var(--color-bg-primary)
+    );
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .video-placeholder-inner {
+    text-align: center;
+  }
+
+  .video-play-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--space-md);
+    border-radius: 50%;
+    background-color: var(--color-accent-gold);
+    color: var(--color-text-on-accent);
+    font-size: 1.5rem;
+    opacity: 0.6;
+  }
+
+  .video-placeholder p {
+    color: var(--color-text-secondary);
+    font-family: var(--font-heading);
+    font-size: var(--text-xl);
+    margin: 0;
+  }
+
+  .video-sub {
+    font-family: var(--font-body) !important;
+    font-size: var(--text-sm) !important;
+    color: var(--color-text-muted) !important;
+    margin-top: var(--space-xs) !important;
+  }
+
+  /* ---- Gallery ---- */
+  .filter-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    justify-content: center;
+    margin-bottom: var(--space-2xl);
+  }
+
+  .filter-tab {
+    padding: 0.5rem 1.2rem;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition:
+      background-color var(--transition-fast),
+      border-color var(--transition-fast),
+      color var(--transition-fast);
+    min-height: 44px;
+  }
+
+  .filter-tab:hover,
+  .filter-tab.active {
+    background-color: var(--color-accent-gold);
+    border-color: var(--color-accent-gold);
+    color: var(--color-text-on-accent);
+  }
+
+  .gallery-grid {
+    display: grid;
+    gap: var(--space-md);
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  .gallery-item {
+    position: relative;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    display: block;
+  }
+
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-slow);
+  }
+
+  .gallery-item:hover img {
+    transform: scale(1.05);
+  }
+
+  .gallery-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--space-sm) var(--space-md);
+    background: linear-gradient(transparent, var(--color-overlay));
+    color: var(--color-text-on-accent);
+    font-size: var(--text-xs);
+  }
+
+  .gallery-placeholder-card {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px dashed var(--color-border);
+  }
+
+  /* ---- Testimonials ---- */
+  .testimonials-grid {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .testimonial-card {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    border-left: 3px solid var(--color-accent-gold);
+  }
+
+  .testimonial-quote {
+    font-family: var(--font-heading);
+    font-style: italic;
+    font-size: var(--text-lg);
+    color: var(--color-text-primary);
+    line-height: 1.6;
+    margin-bottom: var(--space-md);
+  }
+
+  .testimonial-quote :global(p) {
+    color: var(--color-text-primary);
+  }
+
+  .testimonial-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    align-items: center;
+    font-style: normal;
+  }
+
+  .testimonial-name {
+    font-weight: 700;
+    color: var(--color-accent-gold);
+    font-style: normal;
+  }
+
+  .testimonial-venue,
+  .testimonial-type {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .testimonial-venue::before,
+  .testimonial-type::before {
+    content: "\00B7";
+    margin-right: var(--space-sm);
+  }
+
+  /* ---- About ---- */
+  .story-text {
+    max-width: 700px;
+    margin: 0 auto var(--space-2xl);
+    text-align: center;
+  }
+
+  .story-text p {
+    font-size: var(--text-lg);
+    line-height: 1.8;
+  }
+
+  .members-grid {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .member-card {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .member-photo {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+
+  .member-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .member-info {
+    padding: var(--space-lg);
+  }
+
+  .member-info h3 {
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-xs);
+  }
+
+  .member-instrument {
+    color: var(--color-accent-gold);
+    font-weight: 700;
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-md);
+  }
+
+  .member-bio {
+    font-size: var(--text-sm);
+  }
+
+  .member-bio :global(p) {
+    font-size: var(--text-sm);
+  }
+
+  /* ---- What is a Ceilidh ---- */
+  .intro-text {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto var(--space-2xl);
+  }
+
+  .intro-text p {
+    font-size: var(--text-lg);
+    line-height: 1.8;
+  }
+
+  .pronunciation {
+    font-size: var(--text-2xl) !important;
+    font-family: var(--font-heading);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-xl) !important;
+  }
+
+  .pronunciation em {
+    color: var(--color-accent-gold);
+  }
+
+  .expect-heading {
+    text-align: center;
+    font-size: var(--text-xl);
+    color: var(--color-accent-terracotta);
+    margin-bottom: var(--space-lg);
+  }
+
+  .expect-grid {
+    display: grid;
+    gap: var(--space-xl);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .expect-item {
+    padding: var(--space-lg);
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .expect-item h4 {
+    color: var(--color-accent-gold);
+    margin-bottom: var(--space-sm);
+    font-size: var(--text-lg);
+  }
+
+  .expect-item p {
+    font-size: var(--text-sm);
+    margin: 0;
+  }
+
+  .faq-section {
+    margin-top: var(--space-xl);
+  }
+
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .faq-item {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: border-color var(--transition-fast);
+  }
+
+  .faq-item[open] {
+    border-color: var(--color-accent-gold);
+  }
+
+  .faq-question {
+    padding: var(--space-lg);
+    font-weight: 700;
+    font-size: var(--text-lg);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .faq-question::before {
+    content: "+";
+    margin-right: var(--space-md);
+    font-size: var(--text-xl);
+    color: var(--color-accent-gold);
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: transform var(--transition-fast);
+  }
+
+  .faq-item[open] .faq-question::before {
+    content: "\2212";
+  }
+
+  .faq-answer {
+    padding: 0 var(--space-lg) var(--space-lg);
+    padding-left: calc(var(--space-lg) + var(--text-xl) + var(--space-md));
+  }
+
+  .faq-answer :global(p) {
+    font-size: var(--text-base);
+    line-height: 1.7;
+  }
+
+  /* ---- Events ---- */
+  .events-grid {
+    display: grid;
+    gap: var(--space-lg);
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .event-card {
+    display: flex;
+    gap: var(--space-lg);
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+  }
+
+  .event-date-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px;
+    padding: var(--space-sm);
+    background-color: var(--color-accent-gold);
+    border-radius: var(--radius-md);
+    color: var(--color-text-on-accent);
+    text-align: center;
+  }
+
+  .event-day {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .event-month {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .event-info h3 {
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-xs);
+  }
+
+  .event-venue {
+    font-size: var(--text-sm);
+    color: var(--color-accent-copper);
+    margin-bottom: var(--space-xs);
+  }
+
+  .event-desc {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+  }
+
+  .event-price {
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--color-accent-gold);
+    margin-top: var(--space-sm);
+  }
+
+  /* ---- CTA Banner ---- */
+  .cta-banner {
+    background: linear-gradient(
+      135deg,
+      var(--color-accent-gold),
+      var(--color-accent-terracotta)
+    );
+    padding: var(--space-4xl) 0;
+  }
+
+  .cta-banner-inner {
+    text-align: center;
+  }
+
+  .cta-banner h2 {
+    color: var(--color-text-on-accent);
+    margin-bottom: var(--space-md);
+  }
+
+  .cta-banner p {
+    color: var(--color-text-on-accent-muted);
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-xl);
+  }
+
+  .cta-banner :global(.btn--outline) {
+    border-color: var(--color-text-on-accent);
+    color: var(--color-text-on-accent);
+  }
+
+  .cta-banner :global(.btn--outline:hover) {
+    background-color: var(--color-text-on-accent);
+    color: var(--color-accent-gold);
+  }
+
+  /* ---- Responsive ---- */
+  @media (min-width: 768px) {
+    .trust-divider {
+      display: inline;
+    }
+
+    .services-grid--three {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .testimonials-grid {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+
+    .members-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .expect-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .members-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>
+
+<script>
+  // Gallery category filtering
+  const tabs = document.querySelectorAll<HTMLButtonElement>(".filter-tab");
+  const items = document.querySelectorAll<HTMLElement>(".gallery-item, .gallery-placeholder-card");
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const category = tab.dataset.category;
+
+      tabs.forEach((t) => {
+        t.classList.remove("active");
+        t.setAttribute("aria-selected", "false");
+      });
+      tab.classList.add("active");
+      tab.setAttribute("aria-selected", "true");
+
+      items.forEach((item) => {
+        if (category === "All" || item.dataset.category === category) {
+          item.style.display = "";
+        } else {
+          item.style.display = "none";
+        }
+      });
+    });
+  });
+</script>

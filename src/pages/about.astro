@@ -1,0 +1,280 @@
+---
+import PageLayout from "@/layouts/PageLayout.astro";
+import SectionHeading from "@/components/ui/SectionHeading.astro";
+import Button from "@/components/ui/Button.astro";
+import PlaceholderImage from "@/components/ui/PlaceholderImage.astro";
+import { getCollection, render } from "astro:content";
+
+const allMembers = await getCollection("members");
+const members = allMembers.sort((a, b) => a.data.sortOrder - b.data.sortOrder);
+const caller = members.find((m) => m.data.isCaller);
+const musicians = members.filter((m) => !m.data.isCaller);
+
+const title = "About Mad Robin — Ceilidh & Early Music Based in Exeter, Devon";
+const description =
+  "Meet Mad Robin, a 5-piece English ceilidh band and early music ensemble based in Exeter, Devon.";
+---
+
+<PageLayout title={title} description={description}>
+  <!-- ======== BAND STORY ======== -->
+  <section class="section">
+    <div class="container container--narrow">
+      <SectionHeading tag="h1" title="About the Band" />
+      <div class="story-text">
+        <p>
+          Mad Robin are a lively 5-piece English ceilidh band with a caller,
+          based in Exeter, Devon. We play weddings, corporate events, private
+          parties, and host seasonal public ceilidhs across Devon and the
+          Southwest.
+        </p>
+        <p>
+          Alongside our ceilidhs, we also perform early English music — Playford
+          tunes and folk repertoire — at concerts, festivals, and events.
+        </p>
+        <p>
+          Our music draws on the rich tradition of English country dance — with
+          enough energy and drive to fill any dance floor. Whether it's a barn
+          dance in a village hall or a wedding reception in a grand venue, we
+          bring the party.
+        </p>
+        <p>
+          What makes a Mad Robin ceilidh special? Every dance is called and
+          taught from scratch. No experience needed, no partner required — just
+          enthusiasm. Our caller guides everyone through each dance with
+          warmth and humour, and within minutes even the most reluctant dancers
+          are spinning around the floor.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== BAND MEMBERS ======== -->
+  <section class="section section--alt">
+    <div class="container">
+      <SectionHeading title="Meet the Band" />
+      <div class="members-grid">
+        {
+          musicians.map(async (member) => {
+            const { Content } = await render(member);
+            return (
+              <div class="member-card">
+                <div class="member-photo">
+                  {member.data.photo ? (
+                    <img
+                      src={member.data.photo}
+                      alt={`${member.data.name} — ${member.data.instrument}`}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <PlaceholderImage
+                      alt={`${member.data.name} — ${member.data.instrument}`}
+                      aspectRatio="1 / 1"
+                      icon="🎵"
+                    />
+                  )}
+                </div>
+                <div class="member-info">
+                  <h3>{member.data.name}</h3>
+                  <p class="member-instrument">{member.data.instrument}</p>
+                  <div class="member-bio">
+                    <Content />
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== THE CALLER ======== -->
+  {
+    caller && (
+      <section class="section">
+        <div class="container container--narrow">
+          <SectionHeading title="The Caller" />
+          <div class="caller-section">
+            <div class="caller-photo">
+              {caller.data.photo ? (
+                <img
+                  src={caller.data.photo}
+                  alt={`${caller.data.name} — Caller`}
+                  loading="lazy"
+                />
+              ) : (
+                <PlaceholderImage
+                  alt={`${caller.data.name} — Caller`}
+                  aspectRatio="4 / 3"
+                  icon="📢"
+                />
+              )}
+            </div>
+            <div class="caller-text">
+              {async () => {
+                const { Content } = await render(caller);
+                return <Content />;
+              }}
+              <p>
+                The caller is what makes a ceilidh so inclusive. Before each
+                dance, our caller explains every move step-by-step and walks
+                everyone through it. Then the music starts, and the caller keeps
+                prompting throughout until everyone has it. It means{" "}
+                <strong>everyone dances, no experience needed</strong>.
+              </p>
+              <p>
+                From eight-year-olds to eighty-year-olds, from seasoned dancers
+                to people who've never set foot on a dance floor — our caller
+                brings everyone together.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- ======== CTA BANNER ======== -->
+  <section class="cta-banner">
+    <div class="container cta-banner-inner">
+      <h2>Want Mad Robin at your event?</h2>
+      <p>Get in touch to check availability and discuss your celebration.</p>
+      <Button href="/book-us/" size="lg" variant="outline">Book Us</Button>
+    </div>
+  </section>
+</PageLayout>
+
+<style>
+  /* ---- Story ---- */
+  .story-text p {
+    font-size: var(--text-lg);
+    line-height: 1.8;
+    max-width: 700px;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  /* ---- Members grid ---- */
+  .members-grid {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .member-card {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .member-photo {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+
+  .member-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .member-info {
+    padding: var(--space-lg);
+  }
+
+  .member-info h3 {
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-xs);
+  }
+
+  .member-instrument {
+    color: var(--color-accent-gold);
+    font-weight: 700;
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-md);
+  }
+
+  .member-bio {
+    font-size: var(--text-sm);
+  }
+
+  .member-bio :global(p) {
+    font-size: var(--text-sm);
+  }
+
+  /* ---- Caller section ---- */
+  .caller-section {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .caller-photo {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .caller-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .caller-text p {
+    font-size: var(--text-lg);
+    line-height: 1.8;
+  }
+
+  /* ---- CTA Banner (same as home) ---- */
+  .cta-banner {
+    background: linear-gradient(
+      135deg,
+      var(--color-accent-gold),
+      var(--color-accent-terracotta)
+    );
+    padding: var(--space-4xl) 0;
+  }
+
+  .cta-banner-inner {
+    text-align: center;
+  }
+
+  .cta-banner h2 {
+    color: var(--color-text-on-accent);
+    margin-bottom: var(--space-md);
+  }
+
+  .cta-banner p {
+    color: var(--color-text-on-accent-muted);
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-xl);
+  }
+
+  .cta-banner :global(.btn--outline) {
+    border-color: var(--color-text-on-accent);
+    color: var(--color-text-on-accent);
+  }
+
+  .cta-banner :global(.btn--outline:hover) {
+    background-color: var(--color-text-on-accent);
+    color: var(--color-accent-gold);
+  }
+
+  /* ---- Responsive ---- */
+  @media (min-width: 768px) {
+    .members-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .caller-section {
+      grid-template-columns: 1fr 1.5fr;
+      align-items: start;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .members-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+</style>
