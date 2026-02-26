@@ -19,5 +19,8 @@ dist/
 *.swo
 .DS_Store
 
+# netlify
+.netlify/
+
 # debug
 npm-debug.log*
