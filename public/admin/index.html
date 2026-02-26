@@ -6,7 +6,18 @@
     <meta name="robots" content="noindex, nofollow" />
     <title>Mad Robin CMS</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script>
+      // Use local backend automatically when running on localhost
+      if (location.hostname === "localhost") {
+        window.CMS_MANUAL_INIT = true;
+      }
+    </script>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <script>
+      if (location.hostname === "localhost") {
+        CMS.init({ config: { local_backend: true } });
+      }
+    </script>
   </head>
   <body></body>
 </html>
