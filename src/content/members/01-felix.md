@@ -1,9 +1,8 @@
 ---
-name: "Felix Weedon"
-instrument: "Caller, Bodhr\u00e1n & Concertina"
-role: "Caller & MC"
+name: Felix Weedon
+instrument: Caller, Bodhrán & Concertina
+role: Caller & MC
 sortOrder: 1
 isCaller: true
 ---
-
-Felix calls the dances with warmth and humour, guiding everyone through each move step-by-step. He also plays bodhrán and concertina, adding to the band's rich sound.
+Some help to get started: how long you been playing / into folk; what got you into folk; what do you do when not playing folk; anything else you think people might find interesting.

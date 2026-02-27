@@ -1,10 +1,9 @@
 ---
-clientName: "Mark T."
-eventType: "Private Party"
-venue: "Village hall in Devon"
+clientName: Richard Leevers
+eventType: Private Party
+venue: Village hall somewhere
 date: 2025-11-20
 rating: 5
 featured: true
 ---
-
-We hired Mad Robin for my 50th birthday and it was an absolute blast. The music was brilliant, the atmosphere was electric, and my friends are still talking about it months later. Highly recommend for any celebration!
+I hired Mad Robin for no particular reason and it was an absolute blast. The music was brilliant, the atmosphere was electric, and so I just had to give a totally unforced testimonial. Highly recommend for any celebration!
