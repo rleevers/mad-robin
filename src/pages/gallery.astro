@@ -1,6 +1,7 @@
 ---
 import PageLayout from "@/layouts/PageLayout.astro";
 import SectionHeading from "@/components/ui/SectionHeading.astro";
+import SwipeCarousel from "@/components/ui/SwipeCarousel.astro";
 import { getCollection, render } from "astro:content";
 
 const allGallery = await getCollection("gallery");
@@ -86,7 +87,7 @@ const description =
       <section class="section section--warm">
         <div class="container">
           <SectionHeading title="What People Say" />
-          <div class="testimonials-grid">
+          <SwipeCarousel id="carousel-testimonials" label="Testimonials" desktopGrid="repeat(2, 1fr)" class="testimonials-grid">
             {testimonials.map(async (t) => {
               const { Content } = await render(t);
               return (
@@ -104,7 +105,7 @@ const description =
                 </blockquote>
               );
             })}
-          </div>
+          </SwipeCarousel>
         </div>
       </section>
     )
@@ -195,11 +196,6 @@ const description =
   }
 
   /* ---- Testimonials ---- */
-  .testimonials-grid {
-    display: grid;
-    gap: var(--space-xl);
-  }
-
   .testimonial-card {
     background-color: var(--color-bg-card);
     border: 1px solid var(--color-border);
@@ -244,11 +240,6 @@ const description =
     margin-right: var(--space-sm);
   }
 
-  @media (min-width: 768px) {
-    .testimonials-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
 </style>
 
 <script>
@@ -274,6 +265,9 @@ const description =
           item.style.display = "none";
         }
       });
+
+      // Regenerate carousel dots after filtering
+      document.dispatchEvent(new CustomEvent("carousel:update"));
     });
   });
 </script>

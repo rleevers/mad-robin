@@ -2,6 +2,7 @@
 import PageLayout from "@/layouts/PageLayout.astro";
 import SectionHeading from "@/components/ui/SectionHeading.astro";
 import Button from "@/components/ui/Button.astro";
+import SwipeCarousel from "@/components/ui/SwipeCarousel.astro";
 const title = "Book Mad Robin — Ceilidh & Early Music in Devon & the Southwest";
 const description =
   "Check availability and book Mad Robin for your wedding, corporate event, or party. Packages from £800. Based in Exeter, Devon.";
@@ -23,7 +24,7 @@ const description =
   <section class="section">
     <div class="container container--narrow">
       <SectionHeading title="What's Included" />
-      <div class="included-grid">
+      <SwipeCarousel id="carousel-included" label="What's included" desktopGrid="repeat(2, 1fr)" cardMinWidth="80%" class="included-grid">
         <div class="included-item">
           <strong>Live Music</strong>
           <p>A 4-piece band playing lively traditional and contemporary ceilidh tunes</p>
@@ -44,7 +45,7 @@ const description =
           <strong>Early Music Sets</strong>
           <p>Playford and English folk tunes available as a concert or ambient performance</p>
         </div>
-      </div>
+      </SwipeCarousel>
     </div>
   </section>
 
@@ -162,11 +163,6 @@ const description =
   }
 
   /* ---- What's included ---- */
-  .included-grid {
-    display: grid;
-    gap: var(--space-lg);
-  }
-
   .included-item {
     padding: var(--space-lg);
     border-left: 3px solid var(--color-accent-gold);
@@ -260,10 +256,6 @@ const description =
 
   /* ---- Responsive ---- */
   @media (min-width: 768px) {
-    .included-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
     .form-row {
       grid-template-columns: 1fr 1fr;
     }

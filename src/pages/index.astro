@@ -3,6 +3,7 @@ import PageLayout from "@/layouts/PageLayout.astro";
 import SectionHeading from "@/components/ui/SectionHeading.astro";
 import Button from "@/components/ui/Button.astro";
 import PlaceholderImage from "@/components/ui/PlaceholderImage.astro";
+import SwipeCarousel from "@/components/ui/SwipeCarousel.astro";
 import { getCollection, render } from "astro:content";
 
 // Fetch content
@@ -127,7 +128,7 @@ const jsonLd = JSON.stringify([
       </p>
 
       <h3 class="services-subheading">Ceilidhs</h3>
-      <div class="services-grid services-grid--three">
+      <SwipeCarousel id="carousel-ceilidhs" label="Ceilidh services" class="services-grid">
         <div class="service-card">
           <a href="/book-us/" class="service-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -174,10 +175,10 @@ const jsonLd = JSON.stringify([
           </p>
           <a href="/#events" class="service-link">Find out more &rarr;</a>
         </div>
-      </div>
+      </SwipeCarousel>
 
       <h3 class="services-subheading">Performance</h3>
-      <div class="services-grid services-grid--three">
+      <SwipeCarousel id="carousel-performance" label="Performance services" class="services-grid">
         <div class="service-card">
           <a href="/book-us/" class="service-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -224,7 +225,7 @@ const jsonLd = JSON.stringify([
           </p>
           <a href="/book-us/" class="service-link">Find out more &rarr;</a>
         </div>
-      </div>
+      </SwipeCarousel>
     </div>
   </section>
 
@@ -310,36 +311,6 @@ const jsonLd = JSON.stringify([
     </div>
   </section>
 
-  <!-- ======== TESTIMONIALS ======== -->
-  {
-    featuredTestimonials.length > 0 && (
-      <section class="section section--warm" id="testimonials">
-        <div class="container">
-          <SectionHeading title="What People Say" />
-          <div class="testimonials-grid">
-            {featuredTestimonials.map(async (t) => {
-              const { Content } = await render(t);
-              return (
-                <blockquote class="testimonial-card">
-                  <div class="testimonial-quote">
-                    <Content />
-                  </div>
-                  <footer class="testimonial-footer">
-                    <cite class="testimonial-name">{t.data.clientName}</cite>
-                    {t.data.venue && (
-                      <span class="testimonial-venue">{t.data.venue}</span>
-                    )}
-                    <span class="testimonial-type">{t.data.eventType}</span>
-                  </footer>
-                </blockquote>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-    )
-  }
-
   <!-- ======== ABOUT THE BAND ======== -->
   <section class="section section--alt" id="about">
     <div class="container">
@@ -359,7 +330,7 @@ const jsonLd = JSON.stringify([
         </p>
       </div>
 
-      <div class="members-grid">
+      <SwipeCarousel id="carousel-members" label="Band members" desktopGrid="repeat(2, 1fr)" desktopGridLg="repeat(3, 1fr)" class="members-grid">
         {
           members.map(async (member) => {
             const { Content } = await render(member);
@@ -391,9 +362,39 @@ const jsonLd = JSON.stringify([
             );
           })
         }
-      </div>
+      </SwipeCarousel>
     </div>
   </section>
+
+  <!-- ======== TESTIMONIALS ======== -->
+  {
+    featuredTestimonials.length > 0 && (
+      <section class="section section--warm" id="testimonials">
+        <div class="container">
+          <SectionHeading title="What People Say" />
+          <div class="testimonials-grid">
+            {featuredTestimonials.map(async (t) => {
+              const { Content } = await render(t);
+              return (
+                <blockquote class="testimonial-card">
+                  <div class="testimonial-quote">
+                    <Content />
+                  </div>
+                  <footer class="testimonial-footer">
+                    <cite class="testimonial-name">{t.data.clientName}</cite>
+                    {t.data.venue && (
+                      <span class="testimonial-venue">{t.data.venue}</span>
+                    )}
+                    <span class="testimonial-type">{t.data.eventType}</span>
+                  </footer>
+                </blockquote>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   <!-- ======== WHAT IS A CEILIDH? ======== -->
   <section class="section" id="what-is-a-ceilidh">
@@ -608,13 +609,7 @@ const jsonLd = JSON.stringify([
   }
 
   .services-grid {
-    display: grid;
-    gap: var(--space-xl);
     margin-bottom: var(--space-2xl);
-  }
-
-  .services-grid--three {
-    /* default 1 col, upgraded in media queries */
   }
 
   .service-card {
@@ -839,8 +834,7 @@ const jsonLd = JSON.stringify([
   }
 
   .members-grid {
-    display: grid;
-    gap: var(--space-xl);
+    /* gap and grid handled by SwipeCarousel */
   }
 
   .member-card {
@@ -1069,26 +1063,12 @@ const jsonLd = JSON.stringify([
       display: inline;
     }
 
-    .services-grid--three {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
     .testimonials-grid {
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     }
 
-    .members-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
     .expect-grid {
       grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .members-grid {
-      grid-template-columns: repeat(3, 1fr);
     }
   }
 </style>
@@ -1116,6 +1096,9 @@ const jsonLd = JSON.stringify([
           item.style.display = "none";
         }
       });
+
+      // Regenerate carousel dots after filtering
+      document.dispatchEvent(new CustomEvent("carousel:update"));
     });
   });
 </script>

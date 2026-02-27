@@ -1,0 +1,233 @@
+---
+interface Props {
+  id: string;
+  label: string;
+  desktopGrid?: string;
+  desktopGridLg?: string;
+  cardMinWidth?: string;
+  class?: string;
+}
+
+const {
+  id,
+  label,
+  desktopGrid = "repeat(3, 1fr)",
+  desktopGridLg,
+  cardMinWidth = "85%",
+  class: className,
+} = Astro.props;
+---
+
+<div
+  class:list={["carousel", className]}
+  role="region"
+  aria-roledescription="carousel"
+  aria-label={label}
+  id={id}
+  data-card-min-width={cardMinWidth}
+>
+  <div class="carousel-track" tabindex="0">
+    <slot />
+  </div>
+  <div class="carousel-dots" role="tablist" aria-label={`${label} slides`}></div>
+</div>
+
+<style define:vars={{ desktopGrid, desktopGridLg: desktopGridLg || desktopGrid, cardMinWidth }}>
+  /* Desktop: track is transparent, parent grid controls layout */
+  .carousel {
+    position: relative;
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .carousel-track {
+    display: contents;
+  }
+
+  .carousel-dots {
+    display: none;
+  }
+
+  /* Desktop grid via parent */
+  @media (min-width: 768px) {
+    .carousel {
+      grid-template-columns: var(--desktopGrid);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .carousel {
+      grid-template-columns: var(--desktopGridLg);
+    }
+  }
+
+  /* Mobile: horizontal scroll-snap carousel */
+  @media (max-width: 767px) {
+    .carousel {
+      display: block;
+    }
+
+    .carousel-track {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      gap: var(--space-md);
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .carousel-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .carousel-track:focus-visible {
+      outline: 2px solid var(--color-accent-gold);
+      outline-offset: 2px;
+      border-radius: var(--radius-md);
+    }
+
+    .carousel-track > :global(*) {
+      flex: 0 0 var(--cardMinWidth);
+      scroll-snap-align: center;
+    }
+
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-sm);
+      padding-top: var(--space-lg);
+    }
+
+    .carousel-dots :global(.carousel-dot) {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: none;
+      background: var(--color-border);
+      cursor: pointer;
+      padding: 0;
+      transition: background var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .carousel-dots :global(.carousel-dot[aria-selected="true"]) {
+      background: var(--color-accent-gold);
+      transform: scale(1.3);
+    }
+
+    .carousel-dots :global(.carousel-dot:focus-visible) {
+      outline: 2px solid var(--color-accent-gold);
+      outline-offset: 2px;
+    }
+  }
+
+  @media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+    .carousel-track {
+      scroll-behavior: auto;
+    }
+  }
+</style>
+
+<script>
+  function initCarousels() {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const carousels = document.querySelectorAll<HTMLElement>(".carousel");
+    const state = new Map<string, { observer: IntersectionObserver; keyHandler: (e: KeyboardEvent) => void }>();
+
+    function setup(carousel: HTMLElement) {
+      const track = carousel.querySelector<HTMLElement>(".carousel-track");
+      const dotsContainer = carousel.querySelector<HTMLElement>(".carousel-dots");
+      if (!track || !dotsContainer) return;
+
+      const cards = Array.from(track.children) as HTMLElement[];
+      if (cards.length === 0) return;
+
+      // Build dots
+      dotsContainer.innerHTML = "";
+      cards.forEach((card, i) => {
+        const dot = document.createElement("button");
+        dot.className = "carousel-dot";
+        dot.setAttribute("role", "tab");
+        dot.setAttribute("aria-selected", i === 0 ? "true" : "false");
+        dot.setAttribute("aria-label", `Slide ${i + 1} of ${cards.length}`);
+        dot.addEventListener("click", () => {
+          card.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+        });
+        dotsContainer.appendChild(dot);
+      });
+
+      const dots = Array.from(dotsContainer.children) as HTMLElement[];
+
+      // IntersectionObserver to track active card
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              const idx = cards.indexOf(entry.target as HTMLElement);
+              if (idx === -1) continue;
+              dots.forEach((d, i) => d.setAttribute("aria-selected", i === idx ? "true" : "false"));
+            }
+          }
+        },
+        { root: track, threshold: 0.6 }
+      );
+
+      cards.forEach((card) => observer.observe(card));
+
+      // Keyboard navigation
+      const keyHandler = (e: KeyboardEvent) => {
+        if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+        e.preventDefault();
+        const current = dots.findIndex((d) => d.getAttribute("aria-selected") === "true");
+        const next = e.key === "ArrowRight"
+          ? Math.min(current + 1, cards.length - 1)
+          : Math.max(current - 1, 0);
+        cards[next].scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      };
+      track.addEventListener("keydown", keyHandler);
+
+      state.set(carousel.id, { observer, keyHandler });
+    }
+
+    function teardown(carousel: HTMLElement) {
+      const s = state.get(carousel.id);
+      if (!s) return;
+      s.observer.disconnect();
+      const track = carousel.querySelector<HTMLElement>(".carousel-track");
+      if (track) track.removeEventListener("keydown", s.keyHandler);
+      const dotsContainer = carousel.querySelector<HTMLElement>(".carousel-dots");
+      if (dotsContainer) dotsContainer.innerHTML = "";
+      state.delete(carousel.id);
+    }
+
+    function onBreakpoint(e: MediaQueryListEvent | MediaQueryList) {
+      carousels.forEach((carousel) => {
+        if (e.matches) {
+          setup(carousel);
+        } else {
+          teardown(carousel);
+        }
+      });
+    }
+
+    mq.addEventListener("change", onBreakpoint);
+    onBreakpoint(mq);
+
+    // Listen for carousel:update (e.g. after gallery filtering)
+    document.addEventListener("carousel:update", () => {
+      if (!mq.matches) return;
+      carousels.forEach((carousel) => {
+        teardown(carousel);
+        setup(carousel);
+      });
+    });
+  }
+
+  // Run on initial load and after Astro page transitions
+  document.addEventListener("astro:page-load", initCarousels);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initCarousels);
+  } else {
+    initCarousels();
+  }
+</script>

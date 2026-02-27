@@ -3,6 +3,7 @@ import PageLayout from "@/layouts/PageLayout.astro";
 import SectionHeading from "@/components/ui/SectionHeading.astro";
 import Button from "@/components/ui/Button.astro";
 import PlaceholderImage from "@/components/ui/PlaceholderImage.astro";
+import SwipeCarousel from "@/components/ui/SwipeCarousel.astro";
 import { getCollection, render } from "astro:content";
 
 const allMembers = await getCollection("members");
@@ -52,7 +53,7 @@ const description =
   <section class="section section--alt">
     <div class="container">
       <SectionHeading title="Meet the Band" />
-      <div class="members-grid">
+      <SwipeCarousel id="carousel-members" label="Band members" desktopGrid="repeat(2, 1fr)" desktopGridLg="repeat(4, 1fr)" class="members-grid">
         {
           musicians.map(async (member) => {
             const { Content } = await render(member);
@@ -84,7 +85,7 @@ const description =
             );
           })
         }
-      </div>
+      </SwipeCarousel>
     </div>
   </section>
 
@@ -155,11 +156,6 @@ const description =
   }
 
   /* ---- Members grid ---- */
-  .members-grid {
-    display: grid;
-    gap: var(--space-xl);
-  }
-
   .member-card {
     background-color: var(--color-bg-card);
     border: 1px solid var(--color-border);
@@ -262,19 +258,9 @@ const description =
 
   /* ---- Responsive ---- */
   @media (min-width: 768px) {
-    .members-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
     .caller-section {
       grid-template-columns: 1fr 1.5fr;
       align-items: start;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .members-grid {
-      grid-template-columns: repeat(4, 1fr);
     }
   }
 </style>
