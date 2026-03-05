@@ -187,9 +187,9 @@ const jsonLd = JSON.stringify([
           </a>
           <h4>Concerts & Festivals</h4>
           <p>
-            Formal and semi-formal performances at folk festivals, early
-            music festivals, concert halls, and folk clubs. Repertoire from
-            Playford, English folk, and country dance traditions.
+            Performances at folk festivals, early music festivals, concert
+            halls, and folk clubs. Repertoire from Playford, English folk,
+            and country dance traditions.
           </p>
           <a href="/book-us/" class="service-link">Find out more &rarr;</a>
         </div>
@@ -596,7 +596,7 @@ const jsonLd = JSON.stringify([
   .ceilidh-info-link {
     text-align: center;
     margin-top: calc(-1 * var(--space-lg));
-    margin-bottom: var(--space-2xl);
+    margin-bottom: var(--space-lg);
     font-size: var(--text-base);
     color: var(--color-text-secondary);
   }
@@ -604,19 +604,22 @@ const jsonLd = JSON.stringify([
   .services-subheading {
     font-size: var(--text-xl);
     color: var(--color-accent-terracotta);
-    margin-bottom: var(--space-lg);
+    margin-top: var(--space-xl);
+    margin-bottom: var(--space-md);
     text-align: center;
   }
 
   .services-grid {
-    margin-bottom: var(--space-2xl);
+    margin-bottom: var(--space-lg);
   }
 
   .service-card {
+    display: flex;
+    flex-direction: column;
     background-color: var(--color-bg-card);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    padding: var(--space-xl);
+    padding: var(--space-lg);
     text-align: center;
     transition: border-color var(--transition-base);
   }
@@ -630,6 +633,10 @@ const jsonLd = JSON.stringify([
     justify-content: center;
     color: var(--color-accent-gold);
     margin-bottom: var(--space-md);
+  }
+
+  .service-card p {
+    flex: 1;
   }
 
   .service-card h4 {
