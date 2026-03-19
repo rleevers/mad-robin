@@ -75,21 +75,11 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
       );
     </script>
     <script>
-      if (window.location.pathname.startsWith("/admin")) {
-        const s = document.createElement("script");
-        s.src = "https://identity.netlify.com/v1/netlify-identity-widget.js";
-        s.onload = () => {
-          if (window.netlifyIdentity) {
-            window.netlifyIdentity.on("init", (user) => {
-              if (!user) {
-                window.netlifyIdentity.on("login", () => {
-                  document.location.href = "/admin/";
-                });
-              }
-            });
-          }
-        };
-        document.head.appendChild(s);
+      // Redirect Netlify Identity tokens (invite, confirmation, recovery)
+      // from the homepage to /admin/ where the widget is loaded
+      const hash = window.location.hash;
+      if (hash && (hash.includes("invite_token") || hash.includes("confirmation_token") || hash.includes("recovery_token"))) {
+        window.location.href = "/admin/" + hash;
       }
     </script>
   </body>
