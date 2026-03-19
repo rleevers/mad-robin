@@ -12,4 +12,22 @@ export default defineConfig({
         !page.includes("/404"),
     }),
   ],
+  vite: {
+    plugins: [
+      {
+        name: "admin-index-rewrite",
+        configureServer(server) {
+          // Rewrite /admin and /admin/ to /admin/index.html so that
+          // Vite serves the static file from public/ instead of
+          // Astro's 404 catch-all intercepting it.
+          server.middlewares.use((req, _res, next) => {
+            if (req.url === "/admin" || req.url === "/admin/") {
+              req.url = "/admin/index.html";
+            }
+            next();
+          });
+        },
+      },
+    ],
+  },
 });
