@@ -70,7 +70,7 @@ const {
     .carousel-track {
       display: flex;
       overflow-x: auto;
-      scroll-snap-type: x mandatory;
+      scroll-snap-type: x proximity;
       -webkit-overflow-scrolling: touch;
       gap: var(--space-md);
       scrollbar-width: none;
@@ -106,7 +106,8 @@ const {
       border: none;
       background: var(--color-border);
       cursor: pointer;
-      padding: 0;
+      padding: 10px;
+      background-clip: content-box;
       transition: background var(--transition-fast), transform var(--transition-fast);
     }
 
@@ -127,6 +128,26 @@ const {
     }
   }
 </style>
+
+<noscript>
+  <style>
+    @media (max-width: 767px) {
+      .carousel-track {
+        display: flex;
+        flex-direction: column;
+        overflow: visible;
+        scroll-snap-type: none;
+      }
+      .carousel-track > * {
+        flex: none;
+        width: 100%;
+      }
+      .carousel-dots {
+        display: none !important;
+      }
+    }
+  </style>
+</noscript>
 
 <script>
   function initCarousels() {

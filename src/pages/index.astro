@@ -4,6 +4,9 @@ import SectionHeading from "@/components/ui/SectionHeading.astro";
 import Button from "@/components/ui/Button.astro";
 import PlaceholderImage from "@/components/ui/PlaceholderImage.astro";
 import SwipeCarousel from "@/components/ui/SwipeCarousel.astro";
+import { Image } from "astro:assets";
+import heroLogo from "@/assets/images/logo.png";
+import heroBand from "@/assets/images/hero-band.jpg";
 import { getCollection, render } from "astro:content";
 
 // Fetch content
@@ -35,6 +38,25 @@ const title =
   "Mad Robin — Live Ceilidh & Early English Music in Devon & the Southwest";
 const description =
   "Mad Robin are a live English ceilidh band and early music ensemble based in Exeter, Devon. Book us for weddings, private parties & public ceilidhs.";
+
+const eventsJsonLd = upcomingEvents.map((e) => ({
+  "@context": "https://schema.org",
+  "@type": "Event",
+  name: e.data.title,
+  startDate: e.data.date.toISOString().split("T")[0],
+  location: {
+    "@type": "Place",
+    name: e.data.venue,
+    ...(e.data.address ? { address: e.data.address } : {}),
+  },
+  description: e.data.description,
+  organizer: {
+    "@type": "MusicGroup",
+    name: "Mad Robin Ceilidh Band",
+    url: "https://madrobinceilidh.co.uk",
+  },
+  url: "https://madrobinceilidh.co.uk/#events",
+}));
 
 const jsonLd = JSON.stringify([
   {
@@ -85,6 +107,7 @@ const jsonLd = JSON.stringify([
       longitude: -3.5339,
     },
   },
+  ...eventsJsonLd,
 ]);
 ---
 
@@ -93,15 +116,39 @@ const jsonLd = JSON.stringify([
 
   <!-- ======== HERO ======== -->
   <section class="hero">
+    <Image
+      src={heroBand}
+      alt=""
+      class="hero-bg"
+      widths={[640, 1024, 1920]}
+      sizes="100vw"
+      format="webp"
+      quality={80}
+      loading="eager"
+      fetchpriority="high"
+    />
     <div class="hero-overlay"></div>
-    <div class="hero-content container">
-      <img src="/images/logo.png" alt="Mad Robin" class="hero-logo" width="400" height="300" />
-      <h1 class="sr-only">Mad Robin</h1>
-      <p class="hero-tagline">
-        Live ceilidh & early English music for weddings, parties & events in Devon and
-        the Southwest
-      </p>
-      <Button href="/book-us/" size="lg">Book Us</Button>
+    <div class="hero-logo-wrap">
+      <Image
+        src={heroLogo}
+        alt="Mad Robin"
+        class="hero-logo"
+        widths={[360, 460, 720]}
+        sizes="(min-width: 768px) 460px, 360px"
+        format="webp"
+        quality={80}
+        fetchpriority="high"
+      />
+    </div>
+    <h1 class="sr-only">Mad Robin</h1>
+    <div class="hero-bottom">
+      <div class="container hero-bottom-inner">
+        <p class="hero-tagline">
+          Live ceilidh & early English music for weddings, parties & events in Devon and
+          the Southwest
+        </p>
+        <Button href="/book-us/" size="lg">Book Us</Button>
+      </div>
     </div>
   </section>
 
@@ -130,100 +177,94 @@ const jsonLd = JSON.stringify([
       <h3 class="services-subheading">Ceilidhs</h3>
       <SwipeCarousel id="carousel-ceilidhs" label="Ceilidh services" class="services-grid">
         <div class="service-card">
-          <a href="/book-us/" class="service-icon" aria-hidden="true">
+          <div class="service-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
             </svg>
-          </a>
+          </div>
           <h4>Weddings</h4>
           <p>
             Get every guest on the dance floor with an unforgettable ceilidh.
             All dances called — no experience needed, just enthusiasm.
           </p>
-          <a href="/book-us/" class="service-link">Find out more &rarr;</a>
         </div>
         <div class="service-card">
-          <a href="/book-us/" class="service-icon" aria-hidden="true">
+          <div class="service-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
               <circle cx="9" cy="7" r="4"/>
               <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
               <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
-          </a>
+          </div>
           <h4>Private Parties</h4>
           <p>
             Birthdays, anniversaries, or just a great excuse to celebrate. A
             ceilidh is the ultimate party — energetic, inclusive, and guaranteed
             to get everyone dancing.
           </p>
-          <a href="/book-us/" class="service-link">Find out more &rarr;</a>
         </div>
         <div class="service-card">
-          <a href="/book-us/" class="service-icon" aria-hidden="true">
+          <div class="service-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 18V5l12-2v13"/>
               <circle cx="6" cy="18" r="3"/>
               <circle cx="18" cy="16" r="3"/>
             </svg>
-          </a>
+          </div>
           <h4>Public Ceilidhs</h4>
           <p>
             We host seasonal public ceilidhs in Exeter. Come along, meet new
             people, and dance the night away. All welcome!
           </p>
-          <a href="/#events" class="service-link">Find out more &rarr;</a>
         </div>
       </SwipeCarousel>
 
       <h3 class="services-subheading">Performance</h3>
       <SwipeCarousel id="carousel-performance" label="Performance services" class="services-grid">
         <div class="service-card">
-          <a href="/book-us/" class="service-icon" aria-hidden="true">
+          <div class="service-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
             </svg>
-          </a>
+          </div>
           <h4>Concerts & Festivals</h4>
           <p>
             Performances at folk festivals, early music festivals, concert
             halls, and folk clubs. Repertoire from Playford, English folk,
             and country dance traditions.
           </p>
-          <a href="/book-us/" class="service-link">Find out more &rarr;</a>
         </div>
         <div class="service-card">
-          <a href="/book-us/" class="service-icon" aria-hidden="true">
+          <div class="service-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M8 2h8l-2 10h-4L8 2z"/>
               <line x1="12" y1="12" x2="12" y2="20"/>
               <line x1="8" y1="20" x2="16" y2="20"/>
             </svg>
-          </a>
+          </div>
           <h4>Events & Functions</h4>
           <p>
             Atmospheric live music for dinners, receptions, and garden
             parties. Background or feature music tailored to the occasion.
           </p>
-          <a href="/book-us/" class="service-link">Find out more &rarr;</a>
         </div>
         <div class="service-card">
-          <a href="/book-us/" class="service-icon" aria-hidden="true">
+          <div class="service-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <rect x="9" y="2" width="6" height="11" rx="3"/>
               <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
               <line x1="12" y1="18" x2="12" y2="22"/>
               <line x1="8" y1="22" x2="16" y2="22"/>
             </svg>
-          </a>
+          </div>
           <h4>Receptions</h4>
           <p>
             Elegant live background music for wedding receptions, drinks
             receptions, and formal dinners. Early English and folk
             repertoire to set the perfect atmosphere.
           </p>
-          <a href="/book-us/" class="service-link">Find out more &rarr;</a>
         </div>
       </SwipeCarousel>
     </div>
@@ -274,6 +315,8 @@ const jsonLd = JSON.stringify([
         }
       </div>
 
+      <div aria-live="polite" class="sr-only" id="gallery-status"></div>
+
       <!-- Gallery grid -->
       <div class="gallery-grid" id="gallery-grid">
         {
@@ -283,7 +326,8 @@ const jsonLd = JSON.stringify([
                   href={item.data.image}
                   class="gallery-item"
                   data-category={item.data.category}
-                  target="_blank"
+                  data-pswp-width="1200"
+                  data-pswp-height="800"
                 >
                   <img
                     src={item.data.image}
@@ -508,6 +552,11 @@ const jsonLd = JSON.stringify([
                   {e.data.ticketPrice && (
                     <p class="event-price">{e.data.ticketPrice}</p>
                   )}
+                  {e.data.ticketLink && (
+                    <a href={e.data.ticketLink} class="event-ticket-link" target="_blank" rel="noopener noreferrer">
+                      Get Tickets &rarr;
+                    </a>
+                  )}
                 </div>
               </div>
             ))}
@@ -523,52 +572,73 @@ const jsonLd = JSON.stringify([
   /* ---- Hero ---- */
   .hero {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 60vh;
-    background: linear-gradient(
-      135deg,
-      var(--color-bg-secondary) 0%,
-      var(--color-bg-tertiary) 50%,
-      var(--color-bg-primary) 100%
-    );
-    overflow: hidden;
+  }
+
+  .hero-bg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  @media (max-width: 1023px) {
+    .hero-bg {
+      height: 85vh;
+      object-fit: cover;
+      object-position: center 30%;
+    }
   }
 
   .hero-overlay {
     position: absolute;
     inset: 0;
-    background: radial-gradient(
-      ellipse at center,
-      transparent 0%,
-      var(--color-hero-vignette) 100%
+    background: linear-gradient(
+      to bottom,
+      rgba(45, 58, 45, 0.05) 0%,
+      rgba(45, 58, 45, 0.35) 50%,
+      rgba(45, 58, 45, 0.65) 100%
     );
+    pointer-events: none;
   }
 
-  .hero-content {
-    position: relative;
-    text-align: center;
-    padding-block: var(--space-4xl);
+  .hero-logo-wrap {
+    position: absolute;
+    top: var(--space-sm);
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 2;
   }
 
   .hero-logo {
-    max-width: 360px;
+    width: clamp(100px, 14vw, 220px);
     height: auto;
-    margin: 0 auto var(--space-lg);
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
   }
 
-  @media (min-width: 768px) {
-    .hero-logo {
-      max-width: 460px;
-    }
+  .hero-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+  }
+
+  .hero-bottom-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-bottom: var(--space-2xl);
   }
 
   .hero-tagline {
     font-size: var(--text-xl);
-    color: var(--color-text-secondary);
+    color: var(--color-text-on-accent);
     max-width: 600px;
-    margin: 0 auto var(--space-2xl);
+    margin: 0 auto var(--space-lg);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
   }
 
   /* ---- Trust bar ---- */
@@ -641,13 +711,6 @@ const jsonLd = JSON.stringify([
 
   .service-card h4 {
     margin-bottom: var(--space-sm);
-  }
-
-  .service-link {
-    display: inline-block;
-    margin-top: var(--space-md);
-    font-size: var(--text-sm);
-    font-weight: 700;
   }
 
   /* ---- Video ---- */
@@ -1064,6 +1127,13 @@ const jsonLd = JSON.stringify([
     margin-top: var(--space-sm);
   }
 
+  .event-ticket-link {
+    display: inline-block;
+    font-size: var(--text-sm);
+    font-weight: 700;
+    margin-top: var(--space-sm);
+  }
+
   /* ---- Responsive ---- */
   @media (min-width: 768px) {
     .trust-divider {
@@ -1081,6 +1151,19 @@ const jsonLd = JSON.stringify([
 </style>
 
 <script>
+  // PhotoSwipe lightbox
+  import PhotoSwipeLightbox from 'photoswipe/lightbox';
+  import 'photoswipe/style.css';
+
+  const lightbox = new PhotoSwipeLightbox({
+    gallery: '#gallery-grid',
+    children: 'a.gallery-item',
+    pswpModule: () => import('photoswipe'),
+  });
+  lightbox.init();
+</script>
+
+<script>
   // Gallery category filtering
   const tabs = document.querySelectorAll<HTMLButtonElement>(".filter-tab");
   const items = document.querySelectorAll<HTMLElement>(".gallery-item, .gallery-placeholder-card");
@@ -1096,13 +1179,21 @@ const jsonLd = JSON.stringify([
       tab.classList.add("active");
       tab.setAttribute("aria-selected", "true");
 
+      let visibleCount = 0;
       items.forEach((item) => {
         if (category === "All" || item.dataset.category === category) {
           item.style.display = "";
+          visibleCount++;
         } else {
           item.style.display = "none";
         }
       });
+
+      // Announce filter result to screen readers
+      const status = document.getElementById("gallery-status");
+      if (status) {
+        status.textContent = `Showing ${visibleCount} photo${visibleCount !== 1 ? "s" : ""} for ${category}`;
+      }
 
       // Regenerate carousel dots after filtering
       document.dispatchEvent(new CustomEvent("carousel:update"));

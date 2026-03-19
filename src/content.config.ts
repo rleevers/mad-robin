@@ -29,7 +29,6 @@ const testimonials = defineCollection({
     ]),
     venue: z.string().optional(),
     date: z.coerce.date().optional(),
-    rating: z.number().min(1).max(5).default(5),
     photo: z.string().optional(),
     featured: z.boolean().default(false),
   }),

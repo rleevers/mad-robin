@@ -41,7 +41,6 @@ collections:
         options: ["Wedding", "Corporate", "Private Party", "Public Ceilidh", "Other"]
       - { label: "Venue", name: "venue", widget: "string", required: false }
       - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, required: false }
-      - { label: "Rating", name: "rating", widget: "number", min: 1, max: 5, default: 5, value_type: "int" }
       - { label: "Photo", name: "photo", widget: "image", required: false }
       - { label: "Featured", name: "featured", widget: "boolean", default: false }
       - { label: "Quote", name: "body", widget: "markdown" }
@@ -93,6 +92,23 @@ collections:
         default: "General"
       - { label: "Sort Order", name: "sortOrder", widget: "number", default: 0, value_type: "int" }
       - { label: "Answer", name: "body", widget: "markdown" }
+
+  # ============ Packages ============
+  - name: "packages"
+    label: "Packages"
+    folder: "src/content/packages"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Name", name: "name", widget: "string" }
+      - { label: "Starting Price", name: "startingPrice", widget: "string" }
+      - label: "Features"
+        name: "features"
+        widget: "list"
+        field: { label: "Feature", name: "feature", widget: "string" }
+      - { label: "Popular", name: "popular", widget: "boolean", default: false }
+      - { label: "Sort Order", name: "sortOrder", widget: "number", default: 0, value_type: "int" }
+      - { label: "Body", name: "body", widget: "markdown", required: false }
 
   # ============ Site Settings ============
   - name: "settings"

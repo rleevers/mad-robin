@@ -8,9 +8,6 @@ export default defineConfig({
       filter: (page) =>
         // Exclude admin and hidden pages until activated
         !page.includes("/admin") &&
-        !page.includes("/gallery") &&
-        !page.includes("/events") &&
-        !page.includes("/what-is-a-ceilidh") &&
         !page.includes("/success") &&
         !page.includes("/404"),
     }),

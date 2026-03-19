@@ -12,7 +12,7 @@ interface Props {
 const {
   title,
   description = "Mad Robin — Live English ceilidh band and early music ensemble for weddings, parties & events in Devon and the Southwest.",
-  ogImage = "/images/og-default.jpg",
+  ogImage = "/images/logo.png",
   noindex = false,
 } = Astro.props;
 
@@ -27,6 +27,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="500x500" href="/favicon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#c23b22" />
 
     <title>{title}</title>
     <meta name="description" content={description} />
@@ -53,20 +54,42 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
     <meta name="geo.region" content="GB-DEV" />
     <meta name="geo.placename" content="Exeter, Devon" />
 
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700&display=swap" /></noscript>
     <slot name="head" />
   </head>
   <body>
     <slot />
     <script>
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("init", (user) => {
-          if (!user) {
-            window.netlifyIdentity.on("login", () => {
-              document.location.href = "/admin/";
+      console.log(
+        "%c    .--.\n   |o_o |   %cFound us in the code.%c\n   |:_/ |   %c\"Up the outside, down the centre.\"%c\n  //   \\ \\  %c— Mad Robin, Playford 1687%c\n (|     | )\n/'\\_   _/`\\\n\\___)=(___/",
+        "color: #c23b22; font-family: monospace; font-size: 13px; line-height: 1.4",
+        "color: #2d3a2d; font-weight: bold; font-size: 13px",
+        "color: #c23b22; font-size: 13px",
+        "color: #5a6b5a; font-style: italic; font-size: 13px",
+        "color: #c23b22; font-size: 13px",
+        "color: #8a9a88; font-size: 12px",
+        "color: #c23b22; font-size: 13px"
+      );
+    </script>
+    <script>
+      if (window.location.pathname.startsWith("/admin")) {
+        const s = document.createElement("script");
+        s.src = "https://identity.netlify.com/v1/netlify-identity-widget.js";
+        s.onload = () => {
+          if (window.netlifyIdentity) {
+            window.netlifyIdentity.on("init", (user) => {
+              if (!user) {
+                window.netlifyIdentity.on("login", () => {
+                  document.location.href = "/admin/";
+                });
+              }
             });
           }
-        });
+        };
+        document.head.appendChild(s);
       }
     </script>
   </body>

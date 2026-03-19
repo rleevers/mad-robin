@@ -3,6 +3,7 @@ import PageLayout from "@/layouts/PageLayout.astro";
 import SectionHeading from "@/components/ui/SectionHeading.astro";
 import Button from "@/components/ui/Button.astro";
 import SwipeCarousel from "@/components/ui/SwipeCarousel.astro";
+const today = new Date().toISOString().split('T')[0];
 const title = "Book Mad Robin — Ceilidh & Early Music in Devon & the Southwest";
 const description =
   "Check availability and book Mad Robin for your wedding, corporate event, or party. Packages from £800. Based in Exeter, Devon.";
@@ -75,17 +76,17 @@ const description =
         <div class="form-row">
           <div class="form-group">
             <label for="name">Name <span class="required">*</span></label>
-            <input type="text" id="name" name="name" required autocomplete="name" />
+            <input type="text" id="name" name="name" required aria-required="true" autocomplete="name" />
           </div>
           <div class="form-group">
             <label for="email">Email <span class="required">*</span></label>
-            <input type="email" id="email" name="email" required autocomplete="email" />
+            <input type="email" id="email" name="email" required aria-required="true" autocomplete="email" />
           </div>
         </div>
 
         <div class="form-group">
           <label for="event-date">Event Date</label>
-          <input type="date" id="event-date" name="event-date" />
+          <input type="date" id="event-date" name="event-date" min={today} />
         </div>
 
         <div class="form-row">
@@ -94,9 +95,9 @@ const description =
             <select id="event-type" name="event-type">
               <option value="">Select...</option>
               <option value="Wedding">Wedding</option>
-              <option value="Private">Private Event</option>
+              <option value="Corporate">Corporate Event</option>
               <option value="Private Party">Private Party</option>
-              <option value="Public Event">Public Event</option>
+              <option value="Public Ceilidh">Public Ceilidh</option>
               <option value="Other">Other</option>
             </select>
           </div>
@@ -113,7 +114,7 @@ const description =
 
         <div class="form-group">
           <label for="message">Message <span class="required">*</span></label>
-          <textarea id="message" name="message" rows="5" required
+          <textarea id="message" name="message" rows="5" required aria-required="true"
             placeholder="Tell us about your event — what are you looking for?"></textarea>
         </div>
 
@@ -130,7 +131,8 @@ const description =
           </select>
         </div>
 
-        <Button variant="primary" size="lg">Send Enquiry</Button>
+        <Button variant="primary" size="lg" type="submit" id="submit-btn">Send Enquiry</Button>
+        <p class="form-error" id="form-error" role="alert" aria-live="polite"></p>
       </form>
     </div>
   </section>
@@ -224,11 +226,25 @@ const description =
   .form-group select:focus,
   .form-group textarea:focus {
     border-color: var(--color-accent-gold);
-    outline: none;
+    outline: 2px solid var(--color-accent-gold);
+    outline-offset: 2px;
   }
 
   .form-group textarea {
     resize: vertical;
+  }
+
+  .form-error {
+    color: var(--color-error);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    text-align: center;
+    min-height: 0;
+    margin: 0;
+  }
+
+  .form-error:empty {
+    display: none;
   }
 
   /* ---- Contact strip ---- */
@@ -267,3 +283,45 @@ const description =
     }
   }
 </style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>(".enquiry-form");
+  const submitBtn = document.getElementById("submit-btn");
+  const errorEl = document.getElementById("form-error");
+
+  if (form && submitBtn && errorEl) {
+    let submitting = false;
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (submitting) return;
+      submitting = true;
+      errorEl.textContent = "";
+
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = "Sending...";
+      submitBtn.setAttribute("disabled", "");
+
+      try {
+        const res = await fetch(form.action, {
+          method: "POST",
+          body: new FormData(form),
+        });
+
+        if (res.ok) {
+          window.location.href = form.action;
+        } else {
+          errorEl.textContent = "Something went wrong. Please try again or email us directly.";
+          submitBtn.textContent = originalText;
+          submitBtn.removeAttribute("disabled");
+          submitting = false;
+        }
+      } catch {
+        errorEl.textContent = "Network error. Please check your connection and try again.";
+        submitBtn.textContent = originalText;
+        submitBtn.removeAttribute("disabled");
+        submitting = false;
+      }
+    });
+  }
+</script>
