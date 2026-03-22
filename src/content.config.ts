@@ -8,6 +8,7 @@ const events = defineCollection({
     date: z.coerce.date(),
     venue: z.string(),
     address: z.string().optional(),
+    mapLink: z.string().url().optional(),
     description: z.string(),
     ticketLink: z.string().url().optional(),
     ticketPrice: z.string().optional(),
