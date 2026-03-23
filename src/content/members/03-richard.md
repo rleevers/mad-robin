@@ -2,7 +2,7 @@
 name: Richard Leevers
 instrument: Fiddle
 role: Melody
-photo: ""
+photo: /images/richard-leevers.jpg
 sortOrder: 3
 isCaller: false
 ---
