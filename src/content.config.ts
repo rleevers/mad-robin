@@ -74,6 +74,14 @@ const faq = defineCollection({
   }),
 });
 
+const whatToExpect = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/content/what-to-expect" }),
+  schema: z.object({
+    title: z.string(),
+    sortOrder: z.number().default(0),
+  }),
+});
+
 const packages = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./src/content/packages" }),
   schema: z.object({
@@ -91,5 +99,6 @@ export const collections = {
   gallery,
   members,
   faq,
+  whatToExpect,
   packages,
 };

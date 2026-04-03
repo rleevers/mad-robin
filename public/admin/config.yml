@@ -78,6 +78,17 @@ collections:
       - { label: "Is Caller", name: "isCaller", widget: "boolean", default: false }
       - { label: "Bio", name: "body", widget: "markdown" }
 
+  # ============ What to Expect ============
+  - name: "what-to-expect"
+    label: "What to Expect"
+    folder: "src/content/what-to-expect"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Sort Order", name: "sortOrder", widget: "number", default: 0, value_type: "int" }
+      - { label: "Body", name: "body", widget: "markdown" }
+
   # ============ FAQ ============
   - name: "faq"
     label: "FAQ"

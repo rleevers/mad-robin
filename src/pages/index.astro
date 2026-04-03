@@ -32,6 +32,9 @@ const galleryItems = allGallery.sort(
 const allFaq = await getCollection("faq");
 const faqItems = allFaq.sort((a, b) => a.data.sortOrder - b.data.sortOrder);
 
+const allExpect = await getCollection("whatToExpect");
+const expectItems = allExpect.sort((a, b) => a.data.sortOrder - b.data.sortOrder);
+
 const galleryCategories = ["All", "Weddings", "Barn Dances", "Private", "Public"];
 
 const title =
@@ -470,33 +473,15 @@ const jsonLd = JSON.stringify([
     <div class="container container--narrow">
       <h3 class="expect-heading">What to Expect</h3>
       <div class="expect-grid">
-        <div class="expect-item">
-          <h4>The Caller</h4>
-          <p>
-            Before each dance, the caller explains the moves and walks everyone
-            through a practice run. Then the music starts, and the caller keeps
-            prompting until everyone's got it. It's fun, friendly, and nobody
-            gets left behind.
-          </p>
-        </div>
-        <div class="expect-item">
-          <h4>The Dances</h4>
-          <p>
-            Expect classics like Strip the Willow, Gay Gordons?, ... (Felix to add), and many more. The dances are sociable and you'll dance with lots of different people throughout the evening, not just your partner.
-          </p>
-        </div>
-        <div class="expect-item">
-          <h4>The Music</h4>
-          <p>
-            Live, energetic folk music played on traditional folk acoustic instruments. The tempo builds throughout the evening, and the energy is infectious. It's impossible not to tap your feet.
-          </p>
-        </div>
-        <div class="expect-item">
-          <h4>What to Wear</h4>
-          <p>
-            Wear whatever's light and comfortable — you'll be moving around! Flat shoes or trainers are recommended, but you can go barefoot! Ceilidh dancing can be quite energetic, so a water bottle is a good idea too.
-          </p>
-        </div>
+        {expectItems.map(async (item) => {
+          const { Content } = await render(item);
+          return (
+            <div class="expect-item">
+              <h4>{item.data.title}</h4>
+              <Content />
+            </div>
+          );
+        })}
       </div>
     </div>
 
