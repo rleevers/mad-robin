@@ -6,4 +6,4 @@ photo: /images/whatsapp-image-2026-03-26-at-20.56.28.jpeg
 sortOrder: 5
 isCaller: false
 ---
-Some help to get started: how long you been playing / into folk; what got you into folk; what do you do when not playing folk; anything else you think people might find interesting.
+Faye found her way into folk through Exeter Uni's Folk Society, starting out on the dance floor before teaching herself cello in 2023 and joining their band.
