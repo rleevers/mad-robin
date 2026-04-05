@@ -2,7 +2,7 @@
 name: Serena Rosewood
 instrument: Recorder
 role: Lead melody
-photo: /images/serena-beach-trip-2022_cropped.jpg
+photo: /images/serena.jpeg
 sortOrder: 2
 isCaller: false
 ---
