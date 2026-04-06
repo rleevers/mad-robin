@@ -24,9 +24,6 @@ collections:
       - { label: "Description", name: "description", widget: "text" }
       - { label: "Ticket Link", name: "ticketLink", widget: "string", required: false }
       - { label: "Ticket Price", name: "ticketPrice", widget: "string", required: false }
-      - { label: "Image", name: "image", widget: "image", required: false }
-      - { label: "Featured", name: "featured", widget: "boolean", default: false }
-      - { label: "Body", name: "body", widget: "markdown", required: false }
 
   # ============ Testimonials ============
   - name: "testimonials"
@@ -41,8 +38,6 @@ collections:
         widget: "select"
         options: ["Wedding", "Corporate", "Private Party", "Public Ceilidh", "Other"]
       - { label: "Venue", name: "venue", widget: "string", required: false }
-      - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, required: false }
-      - { label: "Photo", name: "photo", widget: "image", required: false }
       - { label: "Featured", name: "featured", widget: "boolean", default: false }
       - { label: "Quote", name: "body", widget: "markdown" }
 
@@ -52,16 +47,17 @@ collections:
     folder: "src/content/gallery"
     create: true
     slug: "{{slug}}"
+    summary: "{{sortOrder}} — {{title}} ({{category}})"
+    sortable_fields: ["title", "sortOrder", "category"]
     fields:
-      - { label: "Image", name: "image", widget: "image" }
-      - { label: "Alt Text", name: "alt", widget: "string" }
-      - { label: "Caption", name: "caption", widget: "string", required: false }
+      - { label: "Title", name: "title", widget: "string", hint: "Label for this item (shown in CMS list only, not on the website)" }
+      - { label: "Image", name: "image", widget: "image", required: false, hint: "Thumbnail for the gallery grid. Optional if uploading a video." }
+      - { label: "Video", name: "video", widget: "file", required: false, hint: "Optional MP4 video. Keep under 50 MB.", media_library: { config: { accept: ".mp4" } } }
       - label: "Category"
         name: "category"
         widget: "select"
         options: ["Weddings", "Barn Dances", "Private", "Public"]
       - { label: "Sort Order", name: "sortOrder", widget: "number", default: 0, value_type: "int" }
-      - { label: "Body", name: "body", widget: "markdown", required: false }
 
   # ============ Band Members ============
   - name: "members"
@@ -72,10 +68,8 @@ collections:
     fields:
       - { label: "Name", name: "name", widget: "string" }
       - { label: "Instrument", name: "instrument", widget: "string" }
-      - { label: "Role", name: "role", widget: "string", required: false }
       - { label: "Photo", name: "photo", widget: "image", required: false }
       - { label: "Sort Order", name: "sortOrder", widget: "number", default: 0, value_type: "int" }
-      - { label: "Is Caller", name: "isCaller", widget: "boolean", default: false }
       - { label: "Bio", name: "body", widget: "markdown" }
 
   # ============ What to Expect ============
@@ -97,30 +91,8 @@ collections:
     slug: "{{slug}}"
     fields:
       - { label: "Question", name: "question", widget: "string" }
-      - label: "Category"
-        name: "category"
-        widget: "select"
-        options: ["General", "Booking", "On the Day", "Music"]
-        default: "General"
       - { label: "Sort Order", name: "sortOrder", widget: "number", default: 0, value_type: "int" }
       - { label: "Answer", name: "body", widget: "markdown" }
-
-  # ============ Packages ============
-  - name: "packages"
-    label: "Packages"
-    folder: "src/content/packages"
-    create: true
-    slug: "{{slug}}"
-    fields:
-      - { label: "Name", name: "name", widget: "string" }
-      - { label: "Starting Price", name: "startingPrice", widget: "string" }
-      - label: "Features"
-        name: "features"
-        widget: "list"
-        field: { label: "Feature", name: "feature", widget: "string" }
-      - { label: "Popular", name: "popular", widget: "boolean", default: false }
-      - { label: "Sort Order", name: "sortOrder", widget: "number", default: 0, value_type: "int" }
-      - { label: "Body", name: "body", widget: "markdown", required: false }
 
   # ============ Site Settings ============
   - name: "settings"
@@ -130,15 +102,15 @@ collections:
         name: "site"
         file: "src/data/settings/site.yml"
         fields:
-          - { label: "Band Name", name: "bandName", widget: "string" }
-          - { label: "Tagline", name: "tagline", widget: "string" }
           - { label: "Email", name: "email", widget: "string" }
-          - { label: "Description", name: "description", widget: "text" }
+          - { label: "Phone", name: "phone", widget: "string" }
+          - { label: "Phone Note", name: "phoneNote", widget: "string", hint: "Shown below the phone number, e.g. 'Please leave a message'" }
           - { label: "Response Promise", name: "responsePromise", widget: "string" }
+          - { label: "Showreel URL", name: "showreelUrl", widget: "string", required: false, hint: "Paste a YouTube link to embed on the homepage. Leave empty for the placeholder." }
           - label: "Social Links"
             name: "socialLinks"
             widget: "object"
             fields:
-              - { label: "Facebook", name: "facebook", widget: "string", required: false }
-              - { label: "Instagram", name: "instagram", widget: "string", required: false }
-              - { label: "YouTube", name: "youtube", widget: "string", required: false }
+              - { label: "Facebook", name: "facebook", widget: "string", required: false, hint: "Full URL, e.g. https://facebook.com/madrobinband" }
+              - { label: "Instagram", name: "instagram", widget: "string", required: false, hint: "Full URL, e.g. https://instagram.com/madrobinband" }
+              - { label: "YouTube", name: "youtube", widget: "string", required: false, hint: "Full URL, e.g. https://youtube.com/@madrobinband" }

@@ -9,6 +9,7 @@
 import { Image } from "astro:assets";
 import robinLogo from "@/assets/images/robin.png";
 import Button from "@/components/ui/Button.astro";
+import siteSettings from "@/data/settings/site.yml";
 
 const NAV_ITEMS = [
   { label: "What We Do", href: "/#what-we-do" },
@@ -20,10 +21,11 @@ const NAV_ITEMS = [
 const CTA = { label: "Book Us", href: "/book-us/" };
 const currentPath = Astro.url.pathname;
 
+const headerLinks = siteSettings.socialLinks;
 const SOCIALS = [
-  { label: "Facebook", href: "https://facebook.com/madrobinband", icon: "facebook" },
-  { label: "Instagram", href: "https://www.instagram.com/madrobinband/", icon: "instagram" },
-  { label: "YouTube", href: "https://youtube.com/@madrobinband", icon: "youtube" },
+  ...(headerLinks.facebook ? [{ label: "Facebook", href: headerLinks.facebook, icon: "facebook" }] : []),
+  ...(headerLinks.instagram ? [{ label: "Instagram", href: headerLinks.instagram, icon: "instagram" }] : []),
+  ...(headerLinks.youtube ? [{ label: "YouTube", href: headerLinks.youtube, icon: "youtube" }] : []),
 ];
 ---
 

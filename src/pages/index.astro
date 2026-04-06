@@ -8,6 +8,7 @@ import { Image } from "astro:assets";
 import heroLogo from "@/assets/images/logo.png";
 import heroBand from "@/assets/images/hero-band.jpg";
 import { getCollection, render } from "astro:content";
+import siteSettings from "@/data/settings/site.yml";
 
 // Fetch content
 const allTestimonials = await getCollection("testimonials");
@@ -34,6 +35,16 @@ const faqItems = allFaq.sort((a, b) => a.data.sortOrder - b.data.sortOrder);
 
 const allExpect = await getCollection("whatToExpect");
 const expectItems = allExpect.sort((a, b) => a.data.sortOrder - b.data.sortOrder);
+
+// Extract YouTube video ID from various URL formats
+function getYouTubeId(url: string): string | null {
+  if (!url) return null;
+  const match = url.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([a-zA-Z0-9_-]{11})/
+  );
+  return match ? match[1] : null;
+}
+const showreelVideoId = getYouTubeId(siteSettings.showreelUrl || "");
 
 const galleryCategories = ["All", "Weddings", "Barn Dances", "Private", "Public"];
 
@@ -281,15 +292,27 @@ const jsonLd = JSON.stringify([
         subtitle="Watch and listen to get a taste of what we do"
       />
       <div class="video-container">
-        <div class="video-placeholder">
-          <div class="video-placeholder-inner">
-            <span class="video-play-icon" aria-hidden="true">&#9654;</span>
-            <p>Showreel coming soon</p>
-            <p class="video-sub">
-              Check back soon for a taste of Mad Robin live
-            </p>
+        {showreelVideoId ? (
+          <div class="video-embed">
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${showreelVideoId}`}
+              title="Mad Robin showreel"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              loading="lazy"
+            ></iframe>
           </div>
-        </div>
+        ) : (
+          <div class="video-placeholder">
+            <div class="video-placeholder-inner">
+              <span class="video-play-icon" aria-hidden="true">&#9654;</span>
+              <p>Showreel coming soon</p>
+              <p class="video-sub">
+                Check back soon for a taste of Mad Robin live
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   </section>
@@ -299,7 +322,7 @@ const jsonLd = JSON.stringify([
     <div class="container">
       <SectionHeading
         title="Gallery"
-        subtitle="Photos from our events"
+        subtitle="Photos and videos from our events"
       />
 
       <!-- Category filter tabs -->
@@ -326,21 +349,45 @@ const jsonLd = JSON.stringify([
           galleryItems.length > 0
             ? galleryItems.map((item) => (
                 <a
-                  href={item.data.image}
-                  class="gallery-item"
+                  href={item.data.image || "#"}
+                  class:list={[
+                    "gallery-item",
+                    { "gallery-item--video": !!item.data.video },
+                    { "gallery-item--video-only": !!item.data.video && !item.data.image },
+                  ]}
                   data-category={item.data.category}
                   data-pswp-width="1200"
                   data-pswp-height="800"
+                  {...(item.data.video ? { "data-video-src": item.data.video } : {})}
                 >
-                  <img
-                    src={item.data.image}
-                    alt={item.data.alt}
-                    loading="lazy"
-                    width="400"
-                    height="300"
-                  />
-                  {item.data.caption && (
-                    <span class="gallery-caption">{item.data.caption}</span>
+                  {item.data.image ? (
+                    <img
+                      src={item.data.image}
+                      alt="Gallery photo"
+                      loading="lazy"
+                      width="400"
+                      height="300"
+                    />
+                  ) : (
+                    <div class="gallery-video-placeholder">
+                      <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/>
+                        <line x1="7" y1="2" x2="7" y2="22"/>
+                        <line x1="17" y1="2" x2="17" y2="22"/>
+                        <line x1="2" y1="12" x2="22" y2="12"/>
+                        <line x1="2" y1="7" x2="7" y2="7"/>
+                        <line x1="2" y1="17" x2="7" y2="17"/>
+                        <line x1="17" y1="7" x2="22" y2="7"/>
+                        <line x1="17" y1="17" x2="22" y2="17"/>
+                      </svg>
+                    </div>
+                  )}
+                  {item.data.video && (
+                    <span class="gallery-play-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                    </span>
                   )}
                 </a>
               ))
@@ -687,11 +734,6 @@ const jsonLd = JSON.stringify([
     border-radius: var(--radius-lg);
     padding: var(--space-lg);
     text-align: center;
-    transition: border-color var(--transition-base);
-  }
-
-  .service-card:hover {
-    border-color: var(--color-accent-gold);
   }
 
   .service-icon {
@@ -713,6 +755,21 @@ const jsonLd = JSON.stringify([
   .video-container {
     max-width: 800px;
     margin: 0 auto;
+  }
+
+  .video-embed {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .video-embed iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
   }
 
   .video-placeholder {
@@ -817,15 +874,39 @@ const jsonLd = JSON.stringify([
     transform: scale(1.05);
   }
 
-  .gallery-caption {
+  .gallery-play-icon {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: var(--space-sm) var(--space-md);
-    background: linear-gradient(transparent, var(--color-overlay));
-    color: var(--color-text-on-accent);
-    font-size: var(--text-xs);
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .gallery-play-icon svg {
+    width: 48px;
+    height: 48px;
+    padding: 12px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    transition: background-color var(--transition-fast);
+  }
+
+  .gallery-item--video:hover .gallery-play-icon svg {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+
+  .gallery-video-placeholder {
+    aspect-ratio: 4 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
   }
 
   .gallery-placeholder-card {
@@ -1156,7 +1237,7 @@ const jsonLd = JSON.stringify([
 </style>
 
 <script>
-  // PhotoSwipe lightbox
+  // PhotoSwipe lightbox with video support
   import PhotoSwipeLightbox from 'photoswipe/lightbox';
   import 'photoswipe/style.css';
 
@@ -1165,6 +1246,67 @@ const jsonLd = JSON.stringify([
     children: 'a.gallery-item',
     pswpModule: () => import('photoswipe'),
   });
+
+  // Mark video items with a custom content type so PhotoSwipe
+  // doesn't try to load href as an image
+  lightbox.addFilter('itemData', (itemData, index) => {
+    const el = itemData.element as HTMLElement;
+    if (el?.dataset.videoSrc) {
+      return {
+        ...itemData,
+        type: 'video',
+        videoSrc: el.dataset.videoSrc,
+        // Give PhotoSwipe a size for the video container
+        width: 1280,
+        height: 720,
+      };
+    }
+    return itemData;
+  });
+
+  lightbox.on('contentLoad', (e) => {
+    const { content } = e;
+    if (content.data.type !== 'video') return;
+
+    e.preventDefault();
+
+    const container = document.createElement('div');
+    container.style.width = '100%';
+    container.style.height = '100%';
+    container.style.display = 'flex';
+    container.style.alignItems = 'center';
+    container.style.justifyContent = 'center';
+    container.style.background = '#000';
+
+    const video = document.createElement('video');
+    video.src = content.data.videoSrc;
+    video.autoplay = true;
+    video.controls = true;
+    video.playsInline = true;
+    video.style.width = '100%';
+    video.style.height = '100%';
+    video.style.objectFit = 'contain';
+
+    container.appendChild(video);
+    content.element = container;
+  });
+
+  lightbox.on('contentActivate', ({ content }) => {
+    const video = content.element?.querySelector('video');
+    if (video) video.play();
+  });
+
+  lightbox.on('contentDeactivate', ({ content }) => {
+    const video = content.element?.querySelector('video');
+    if (video) video.pause();
+  });
+
+  lightbox.on('close', () => {
+    document.querySelectorAll('.pswp video').forEach((v) => {
+      (v as HTMLVideoElement).pause();
+    });
+  });
+
   lightbox.init();
 </script>
 

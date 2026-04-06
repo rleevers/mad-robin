@@ -4,11 +4,13 @@
    ============================================ */
 
 import Button from "@/components/ui/Button.astro";
+import siteSettings from "@/data/settings/site.yml";
 
+const links = siteSettings.socialLinks;
 const SOCIALS = [
-  { label: "Facebook", href: "https://facebook.com/madrobinband", icon: "facebook" },
-  { label: "Instagram", href: "https://www.instagram.com/madrobinband/", icon: "instagram" },
-  { label: "YouTube", href: "https://youtube.com/@madrobinband", icon: "youtube" },
+  ...(links.facebook ? [{ label: "Facebook", href: links.facebook, icon: "facebook" }] : []),
+  ...(links.instagram ? [{ label: "Instagram", href: links.instagram, icon: "instagram" }] : []),
+  ...(links.youtube ? [{ label: "YouTube", href: links.youtube, icon: "youtube" }] : []),
 ];
 
 const currentPath = Astro.url.pathname;
@@ -73,10 +75,10 @@ const currentPath = Astro.url.pathname;
       <div class="footer-col">
         <h4 class="footer-heading">Get in Touch</h4>
         <address class="footer-contact">
-          <a href="mailto:madrobinband@gmail.com" class="footer-link">madrobinband@gmail.com</a>
-          <a href="tel:+447849035551" class="footer-link">+44 7849 035551</a>
-          <p class="footer-small">Please leave a message</p>
-          <p class="footer-small">We respond within 24 hours</p>
+          <a href={`mailto:${siteSettings.email}`} class="footer-link">{siteSettings.email}</a>
+          <a href={`tel:${siteSettings.phone.replace(/\s/g, "")}`} class="footer-link">{siteSettings.phone}</a>
+          <p class="footer-small">{siteSettings.phoneNote}</p>
+          <p class="footer-small">{siteSettings.responsePromise}</p>
         </address>
       </div>
     </div>

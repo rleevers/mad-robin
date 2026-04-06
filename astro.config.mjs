@@ -1,5 +1,6 @@
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
+import yaml from "@rollup/plugin-yaml";
 
 export default defineConfig({
   site: "https://madrobinceilidh.co.uk",
@@ -14,6 +15,7 @@ export default defineConfig({
   ],
   vite: {
     plugins: [
+      yaml(),
       {
         name: "admin-index-rewrite",
         configureServer(server) {

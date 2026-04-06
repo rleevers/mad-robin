@@ -3,6 +3,7 @@ import PageLayout from "@/layouts/PageLayout.astro";
 import SectionHeading from "@/components/ui/SectionHeading.astro";
 import Button from "@/components/ui/Button.astro";
 import SwipeCarousel from "@/components/ui/SwipeCarousel.astro";
+import siteSettings from "@/data/settings/site.yml";
 const today = new Date().toISOString().split('T')[0];
 const title = "Book Mad Robin — Ceilidh & Early Music in Devon & the Southwest";
 const description =
@@ -55,7 +56,7 @@ const description =
     <div class="container container--narrow">
       <SectionHeading
         title="Get in Touch"
-        subtitle="Tell us about your event and we'll get back to you within 24 hours"
+        subtitle={`Tell us about your event — ${siteSettings.responsePromise.toLowerCase()}`}
       />
 
       <form
@@ -142,17 +143,15 @@ const description =
     <div class="container container--narrow contact-strip">
       <div class="contact-item">
         <strong>Email us</strong>
-        <a href="mailto:madrobinband@gmail.com" class="contact-link"
-          >madrobinband@gmail.com</a
-        >
+        <a href={`mailto:${siteSettings.email}`} class="contact-link">{siteSettings.email}</a>
       </div>
       <div class="contact-item">
         <strong>Call us</strong>
-        <a href="tel:+447849035551" class="contact-link">+44 7849 035551</a>
-        <p class="response-promise">Please leave a message</p>
+        <a href={`tel:${siteSettings.phone.replace(/\s/g, "")}`} class="contact-link">{siteSettings.phone}</a>
+        <p class="response-promise">{siteSettings.phoneNote}</p>
       </div>
       <div class="contact-item">
-        <p class="response-promise">We respond within 24 hours</p>
+        <p class="response-promise">{siteSettings.responsePromise}</p>
       </div>
     </div>
   </section>
