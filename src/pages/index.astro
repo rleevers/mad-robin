@@ -356,8 +356,8 @@ const jsonLd = JSON.stringify([
                     { "gallery-item--video-only": !!item.data.video && !item.data.image },
                   ]}
                   data-category={item.data.category}
-                  data-pswp-width="1200"
-                  data-pswp-height="800"
+                  data-pswp-width={item.data.video && !item.data.image ? "1280" : ""}
+                  data-pswp-height={item.data.video && !item.data.image ? "720" : ""}
                   {...(item.data.video ? { "data-video-src": item.data.video } : {})}
                 >
                   {item.data.image ? (
@@ -1247,20 +1247,28 @@ const jsonLd = JSON.stringify([
     pswpModule: () => import('photoswipe'),
   });
 
-  // Mark video items with a custom content type so PhotoSwipe
-  // doesn't try to load href as an image
+  // Detect real image dimensions so portrait images aren't stretched
   lightbox.addFilter('itemData', (itemData, index) => {
     const el = itemData.element as HTMLElement;
+
+    // Video items: use video content type
     if (el?.dataset.videoSrc) {
       return {
         ...itemData,
         type: 'video',
         videoSrc: el.dataset.videoSrc,
-        // Give PhotoSwipe a size for the video container
         width: 1280,
         height: 720,
       };
     }
+
+    // Image items (including those with a video): read natural size
+    const img = el?.querySelector('img') as HTMLImageElement | null;
+    if (img && img.naturalWidth && img.naturalHeight) {
+      itemData.width = img.naturalWidth;
+      itemData.height = img.naturalHeight;
+    }
+
     return itemData;
   });
 
@@ -1280,7 +1288,7 @@ const jsonLd = JSON.stringify([
 
     const video = document.createElement('video');
     video.src = content.data.videoSrc;
-    video.autoplay = true;
+    video.autoplay = false;
     video.controls = true;
     video.playsInline = true;
     video.style.width = '100%';
@@ -1296,16 +1304,15 @@ const jsonLd = JSON.stringify([
     if (video) video.play();
   });
 
-  lightbox.on('contentDeactivate', ({ content }) => {
-    const video = content.element?.querySelector('video');
-    if (video) video.pause();
-  });
-
-  lightbox.on('close', () => {
-    document.querySelectorAll('.pswp video').forEach((v) => {
+  function pauseAllVideos() {
+    document.querySelectorAll('video').forEach((v) => {
       (v as HTMLVideoElement).pause();
     });
-  });
+  }
+
+  lightbox.on('contentDeactivate', () => pauseAllVideos());
+  lightbox.on('close', () => pauseAllVideos());
+  lightbox.on('destroy', () => pauseAllVideos());
 
   lightbox.init();
 </script>
