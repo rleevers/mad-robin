@@ -142,6 +142,7 @@ const jsonLd = JSON.stringify([
     <Image
       src={heroBand}
       alt=""
+      id="hero-bg"
       class="hero-bg"
       widths={[640, 1024, 1920]}
       sizes="100vw"
@@ -689,7 +690,7 @@ const jsonLd = JSON.stringify([
 
   @media (max-width: 1023px) {
     .hero-bg {
-      height: 85svh;
+      height: var(--hero-h, 85svh);
       object-fit: cover;
       object-position: center 30%;
     }
@@ -1352,6 +1353,27 @@ const jsonLd = JSON.stringify([
     }
   }
 </style>
+
+<script>
+  // Lock hero height as a pixel value on load so mobile address-bar show/hide
+  // can't resize it. Only recalculate on genuine orientation changes.
+  (function () {
+    const mq = window.matchMedia("(max-width: 1023px)");
+    function lock() {
+      if (!mq.matches) return;
+      document.documentElement.style.setProperty(
+        "--hero-h",
+        Math.round(window.innerHeight * 0.85) + "px"
+      );
+    }
+    lock();
+    if (screen.orientation) {
+      screen.orientation.addEventListener("change", lock);
+    } else {
+      window.addEventListener("orientationchange", lock);
+    }
+  })();
+</script>
 
 <script>
   // PhotoSwipe lightbox with video support
