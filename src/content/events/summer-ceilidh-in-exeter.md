@@ -8,7 +8,7 @@ description: Join us for an evening of lively ceilidh dancing! No experience or
   dancing from 7:00pm to 9:00pm.
 startTime: "19:00"
 ticketingEnabled: true
-capacity: 50
+capacity: 1
 tiers:
   - name: Adult
     price: 10
