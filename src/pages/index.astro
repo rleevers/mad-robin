@@ -351,7 +351,13 @@ const jsonLd = JSON.stringify([
 
       <div aria-live="polite" class="sr-only" id="gallery-status"></div>
 
-      <div class="gallery-grid" id="gallery-grid">
+      <SwipeCarousel
+        id="gallery-grid"
+        label="Gallery photos and videos"
+        class="gallery-grid"
+        desktopGrid="repeat(auto-fill, minmax(250px, 1fr))"
+        cardMinWidth="85%"
+      >
         {
           galleryItems.length > 0
             ? galleryItems.map((item) => (
@@ -408,7 +414,10 @@ const jsonLd = JSON.stringify([
                 </div>
               ))
         }
-      </div>
+        <button class="gallery-show-more" id="gallery-show-more" style="display:none" aria-label="Show all photos">
+          Show all photos
+        </button>
+      </SwipeCarousel>
     </div>
   </section>
 
@@ -913,9 +922,30 @@ const jsonLd = JSON.stringify([
   }
 
   .gallery-grid {
-    display: grid;
-    gap: var(--space-md);
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--space-md) !important;
+  }
+
+  .gallery-show-more {
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-card);
+    border: 1.5px dashed var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    width: 100%;
+    transition:
+      border-color var(--transition-fast),
+      color var(--transition-fast);
+  }
+
+  .gallery-show-more:hover {
+    border-color: var(--color-accent-gold);
+    color: var(--color-accent-gold);
   }
 
   .gallery-item {
@@ -1518,38 +1548,89 @@ const jsonLd = JSON.stringify([
 </script>
 
 <script>
-  // Gallery category filtering
-  const PREVIEW = 6;
-  const tabs = document.querySelectorAll<HTMLButtonElement>(".filter-tab");
-  const items = Array.from(document.querySelectorAll<HTMLElement>(".gallery-item"));
-  const status = document.getElementById("gallery-status");
+  const desktopMq = window.matchMedia("(min-width: 768px)");
+  const showMoreBtn = document.getElementById("gallery-show-more") as HTMLElement;
+  const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>(".filter-tab"));
+  const items = Array.from(document.querySelectorAll<HTMLElement>(".gallery-item, .gallery-placeholder-card"));
+  const statusEl = document.getElementById("gallery-status");
 
-  tabs.forEach((tab) => {
+  // Hide filter tabs for categories with no content
+  const populated = new Set(items.map(el => el.dataset.category));
+  tabs.forEach(tab => {
+    if (tab.dataset.category !== "All" && !populated.has(tab.dataset.category)) {
+      tab.style.display = "none";
+    }
+  });
+
+  function getColumnCount(): number {
+    const visible = items.filter(el => el.style.display !== "none");
+    if (visible.length < 2) return 1;
+    const firstTop = visible[0].getBoundingClientRect().top;
+    if (firstTop === 0) return 3;
+    let cols = 0;
+    for (const el of visible) {
+      if (Math.abs(el.getBoundingClientRect().top - firstTop) < 5) cols++;
+      else break;
+    }
+    return Math.max(cols, 1);
+  }
+
+  function applyTruncation() {
+    if (!desktopMq.matches) {
+      items.forEach(el => { el.style.display = ""; });
+      showMoreBtn.style.display = "none";
+      return;
+    }
+    items.forEach(el => { el.style.display = ""; });
+    showMoreBtn.style.display = "none";
+
+    const cols = getColumnCount();
+    const threshold = cols * 3 - 1;
+    if (items.length <= threshold) return;
+
+    items.forEach((el, i) => { el.style.display = i < threshold ? "" : "none"; });
+    showMoreBtn.style.display = "";
+    document.dispatchEvent(new CustomEvent("carousel:update"));
+  }
+
+  requestAnimationFrame(() => applyTruncation());
+
+  desktopMq.addEventListener("change", () => {
+    const activeCategory = tabs.find(t => t.classList.contains("active"))?.dataset.category ?? "All";
+    if (activeCategory === "All") applyTruncation();
+    else {
+      items.forEach(el => { el.style.display = ""; });
+      showMoreBtn.style.display = "none";
+    }
+    document.dispatchEvent(new CustomEvent("carousel:update"));
+  });
+
+  showMoreBtn.addEventListener("click", () => {
+    items.forEach(el => { el.style.display = ""; });
+    showMoreBtn.style.display = "none";
+    document.dispatchEvent(new CustomEvent("carousel:update"));
+  });
+
+  tabs.forEach(tab => {
     tab.addEventListener("click", () => {
-      const category = tab.dataset.category;
-
-      tabs.forEach((t) => { t.classList.remove("active"); t.setAttribute("aria-selected", "false"); });
+      const category = tab.dataset.category!;
+      tabs.forEach(t => { t.classList.remove("active"); t.setAttribute("aria-selected", "false"); });
       tab.classList.add("active");
       tab.setAttribute("aria-selected", "true");
 
-      let visible = 0;
       if (category === "All") {
-        items.forEach((item, idx) => {
-          item.style.display = idx < PREVIEW ? "" : "none";
-          if (idx < PREVIEW) visible++;
-        });
+        applyTruncation();
+        if (statusEl) statusEl.textContent = "";
       } else {
-        items.forEach((item) => {
-          const show = item.dataset.category === category;
-          item.style.display = show ? "" : "none";
-          if (show) visible++;
+        showMoreBtn.style.display = "none";
+        let count = 0;
+        items.forEach(el => {
+          const show = el.dataset.category === category;
+          el.style.display = show ? "" : "none";
+          if (show) count++;
         });
-      }
-
-      if (status) {
-        status.textContent = category === "All"
-          ? `Showing ${visible} photos and videos`
-          : `Showing ${visible} ${category} photo${visible !== 1 ? "s" : ""}`;
+        if (statusEl) statusEl.textContent = `Showing ${count} ${category.toLowerCase()} photo${count !== 1 ? "s" : ""}`;
+        document.dispatchEvent(new CustomEvent("carousel:update"));
       }
     });
   });
