@@ -10,8 +10,10 @@ const events = defineCollection({
     address: z.string().optional(),
     mapLink: z.string().url().optional(),
     description: z.string(),
-    ticketLink: z.string().url().optional(),
     ticketPrice: z.string().optional(),
+    startTime: z.string().optional(),
+    capacity: z.number().int().positive().optional(),
+    tiers: z.array(z.object({ name: z.string(), price: z.number() })).optional(),
   }),
 });
 

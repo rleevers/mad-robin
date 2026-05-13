@@ -3,7 +3,7 @@ import sitemap from "@astrojs/sitemap";
 import yaml from "@rollup/plugin-yaml";
 
 export default defineConfig({
-  site: "https://madrobinceilidh.co.uk",
+  site: "https://madrobinband.co.uk",
   integrations: [
     sitemap({
       filter: (page) =>

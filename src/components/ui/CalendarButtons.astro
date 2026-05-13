@@ -1,0 +1,96 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  date: Date;
+  startTime?: string;
+  venue: string;
+  address?: string;
+  description: string;
+  ticketPrice?: string;
+  ticketLink?: string;
+}
+
+const {
+  id,
+  title,
+  date,
+  startTime = "19:30",
+  venue,
+  address,
+  description,
+  ticketPrice,
+  ticketLink,
+} = Astro.props;
+
+const [startH, startM] = startTime.split(":").map(Number);
+const endTime = `${String(startH + 2).padStart(2, "0")}:${String(startM).padStart(2, "0")}`;
+
+function icalDate(d: Date, t: string): string {
+  const y = d.getUTCFullYear();
+  const mo = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const da = String(d.getUTCDate()).padStart(2, "0");
+  const [h, m] = t.split(":").map(Number);
+  return `${y}${mo}${da}T${String(h).padStart(2, "0")}${String(m).padStart(2, "0")}00`;
+}
+
+const gcDates = `${icalDate(date, startTime)}/${icalDate(date, endTime)}`;
+const gcDetails = [
+  description,
+  ticketPrice ? `Tickets: ${ticketPrice}` : "",
+  ticketLink ? `Book: ${ticketLink}` : "",
+]
+  .filter(Boolean)
+  .join("\n");
+const gcLocation = [venue, address].filter(Boolean).join(", ");
+
+const gcUrl = new URL("https://calendar.google.com/calendar/render");
+gcUrl.searchParams.set("action", "TEMPLATE");
+gcUrl.searchParams.set("text", title);
+gcUrl.searchParams.set("dates", gcDates);
+gcUrl.searchParams.set("details", gcDetails);
+gcUrl.searchParams.set("location", gcLocation);
+---
+
+<div class="cal-buttons">
+  <a
+    href={gcUrl.toString()}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="cal-btn"
+  >
+    + Google Calendar
+  </a>
+  <a href={`/events/${id}.ics`} download class="cal-btn">
+    + iCal / Outlook
+  </a>
+</div>
+
+<style>
+  .cal-buttons {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    margin-top: var(--space-sm);
+  }
+
+  .cal-btn {
+    display: inline-block;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-decoration: none;
+    padding: 0.3rem 0.7rem;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--color-border);
+    color: var(--color-text-secondary);
+    background: transparent;
+    transition:
+      border-color var(--transition-fast),
+      color var(--transition-fast);
+  }
+
+  .cal-btn:hover {
+    border-color: var(--color-accent-gold);
+    color: var(--color-accent-gold);
+  }
+</style>
