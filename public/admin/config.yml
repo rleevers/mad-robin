@@ -18,12 +18,20 @@ collections:
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false }
+      - { label: "Start Time", name: "startTime", widget: "string", required: false, hint: "e.g. 19:30 — used for calendar links" }
       - { label: "Venue", name: "venue", widget: "string" }
-      - { label: "Address", name: "address", widget: "string", required: false }
       - { label: "Map Link", name: "mapLink", widget: "string", required: false, hint: "Google Maps share link for the venue" }
       - { label: "Description", name: "description", widget: "text" }
-      - { label: "Ticket Link", name: "ticketLink", widget: "string", required: false }
-      - { label: "Ticket Price", name: "ticketPrice", widget: "string", required: false }
+      - { label: "Sell tickets on website", name: "ticketingEnabled", widget: "boolean", default: false, hint: "Turn on to show the Buy Tickets widget on the event page" }
+      - { label: "Ticket capacity", name: "capacity", widget: "number", required: false, value_type: "int", hint: "Total number of tickets available" }
+      - label: "Ticket tiers"
+        name: "tiers"
+        widget: "list"
+        required: false
+        hint: "Add one row per ticket type, e.g. Adult £10, Concession £8"
+        fields:
+          - { label: "Name", name: "name", widget: "string", hint: "e.g. Adult, Concession, Child" }
+          - { label: "Price (£)", name: "price", widget: "number", value_type: "float", step: 0.5 }
 
   # ============ Testimonials ============
   - name: "testimonials"

@@ -13,7 +13,7 @@ export async function getStaticPaths() {
 const { event } = Astro.props;
 const { data } = event;
 
-const hasTicketing = data.tiers && data.tiers.length > 0 && data.capacity;
+const hasTicketing = data.ticketingEnabled && data.tiers && data.tiers.length > 0 && data.capacity;
 const isPast = data.date < new Date();
 const stripeKey = import.meta.env.STRIPE_PUBLISHABLE_KEY ?? "";
 
