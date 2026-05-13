@@ -601,7 +601,7 @@ const jsonLd = JSON.stringify([
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {e.data.venue} ↗
+                      {e.data.venue}
                     </a>
                   ) : (
                     <p class="event-venue">{e.data.venue}</p>
@@ -611,7 +611,7 @@ const jsonLd = JSON.stringify([
                     <div class="event-ticket-row">
                       <span class="event-price">
                         {e.data.tiers.map((t: {name: string, price: number}, i: number) => (
-                          <span>{t.name}: £{t.price.toFixed(2)}{i < (e.data.tiers?.length ?? 0) - 1 ? " · " : ""}</span>
+                          <span class="tier-pair">{t.name}: £{t.price.toFixed(2)}{i < (e.data.tiers?.length ?? 0) - 1 ? " · " : ""}</span>
                         ))}
                       </span>
                       <span class="event-availability" data-slug={e.id} aria-live="polite"></span>
@@ -1266,6 +1266,10 @@ const jsonLd = JSON.stringify([
     color: var(--color-accent-gold);
   }
 
+  .tier-pair {
+    white-space: nowrap;
+  }
+
   .event-ticket-row {
     display: flex;
     align-items: center;
@@ -1287,6 +1291,8 @@ const jsonLd = JSON.stringify([
     padding: 0.2rem 0.6rem;
     border-radius: var(--radius-full);
   }
+
+  .event-availability:empty { display: none; }
 
   .event-availability--available { background: #e6f4e6; color: #2d6b2d; }
   .event-availability--low { background: #fef3cd; color: #856404; }
