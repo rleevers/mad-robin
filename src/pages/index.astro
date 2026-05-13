@@ -27,9 +27,9 @@ const allMembers = await getCollection("members");
 const members = allMembers.sort((a, b) => a.data.sortOrder - b.data.sortOrder);
 
 const allGallery = await getCollection("gallery");
-const galleryItems = allGallery.sort(
-  (a, b) => a.data.sortOrder - b.data.sortOrder
-);
+const galleryItems = allGallery
+  .sort((a, b) => a.data.sortOrder - b.data.sortOrder)
+  .slice(0, 6);
 
 const allFaq = await getCollection("faq");
 const faqItems = allFaq.sort((a, b) => a.data.sortOrder - b.data.sortOrder);
@@ -54,7 +54,6 @@ function getYouTubeId(url: string): string | null {
 }
 const showreelVideoId = getYouTubeId(siteSettings.showreelUrl || "");
 
-const galleryCategories = ["All", "Weddings", "Barn Dances", "Private", "Public"];
 
 const title =
   "Mad Robin — Live Ceilidh & Early English Music in Devon & the Southwest";
@@ -335,26 +334,14 @@ const jsonLd = JSON.stringify([
         subtitle="Photos and videos from our events"
       />
 
-      <!-- Category filter tabs -->
-      <div class="filter-tabs" role="tablist" aria-label="Gallery categories">
-        {
-          galleryCategories.map((cat) => (
-            <button
-              role="tab"
-              class:list={["filter-tab", { active: cat === "All" }]}
-              data-category={cat}
-              aria-selected={cat === "All" ? "true" : "false"}
-            >
-              {cat}
-            </button>
-          ))
-        }
-      </div>
-
-      <div aria-live="polite" class="sr-only" id="gallery-status"></div>
-
       <!-- Gallery grid -->
-      <div class="gallery-grid" id="gallery-grid">
+      <SwipeCarousel
+        id="gallery-grid"
+        label="Gallery photos and videos"
+        class="gallery-grid"
+        desktopGrid="repeat(auto-fill, minmax(250px, 1fr))"
+        cardMinWidth="85%"
+      >
         {
           galleryItems.length > 0
             ? galleryItems.map((item) => (
@@ -411,7 +398,10 @@ const jsonLd = JSON.stringify([
                 </div>
               ))
         }
-      </div>
+      </SwipeCarousel>
+      <p class="gallery-see-all">
+        <a href="/gallery" class="gallery-see-all-link">See all photos &amp; videos &rarr;</a>
+      </p>
     </div>
   </section>
 
@@ -527,9 +517,9 @@ const jsonLd = JSON.stringify([
       </div>
     </div>
 
-    <div class="container container--narrow">
+    <div class="container">
       <h3 class="expect-heading">What to Expect</h3>
-      <div class="expect-grid">
+      <SwipeCarousel id="carousel-expect" label="What to expect at a ceilidh" class="expect-grid">
         {expectItems.map(async (item) => {
           const { Content } = await render(item);
           return (
@@ -539,7 +529,7 @@ const jsonLd = JSON.stringify([
             </div>
           );
         })}
-      </div>
+      </SwipeCarousel>
     </div>
 
     <!-- FAQ -->
@@ -574,7 +564,7 @@ const jsonLd = JSON.stringify([
             title="Upcoming Events"
             subtitle="Come see us live"
           />
-          <div class="events-grid">
+          <SwipeCarousel id="carousel-events" label="Upcoming events" desktopGrid="1fr" cardMinWidth="92%" class="events-grid">
             {upcomingEvents.map((e) => (
               <div class="event-card">
                 <div class="event-date-badge">
@@ -633,7 +623,7 @@ const jsonLd = JSON.stringify([
                 </div>
               </div>
             ))}
-          </div>
+          </SwipeCarousel>
           <div class="events-subscribe">
             <p class="events-subscribe-label">Subscribe to all events</p>
             <div class="events-subscribe-links">
@@ -866,40 +856,8 @@ const jsonLd = JSON.stringify([
   }
 
   /* ---- Gallery ---- */
-  .filter-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-sm);
-    justify-content: center;
-    margin-bottom: var(--space-2xl);
-  }
-
-  .filter-tab {
-    padding: 0.5rem 1.2rem;
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-full);
-    color: var(--color-text-secondary);
-    font-size: var(--text-sm);
-    cursor: pointer;
-    transition:
-      background-color var(--transition-fast),
-      border-color var(--transition-fast),
-      color var(--transition-fast);
-    min-height: 44px;
-  }
-
-  .filter-tab:hover,
-  .filter-tab.active {
-    background-color: var(--color-accent-gold);
-    border-color: var(--color-accent-gold);
-    color: var(--color-text-on-accent);
-  }
-
   .gallery-grid {
-    display: grid;
     gap: var(--space-md);
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
 
   .gallery-item {
@@ -960,6 +918,22 @@ const jsonLd = JSON.stringify([
     border-radius: var(--radius-md);
     overflow: hidden;
     border: 1px dashed var(--color-border);
+  }
+
+  .gallery-see-all {
+    text-align: center;
+    margin-top: var(--space-xl);
+  }
+
+  .gallery-see-all-link {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-accent-gold);
+    text-decoration: none;
+  }
+
+  .gallery-see-all-link:hover {
+    text-decoration: underline;
   }
 
   /* ---- Testimonials ---- */
@@ -1188,8 +1162,6 @@ const jsonLd = JSON.stringify([
 
   /* ---- Events ---- */
   .events-grid {
-    display: grid;
-    gap: var(--space-lg);
     max-width: 800px;
     margin: 0 auto;
   }
@@ -1423,60 +1395,34 @@ const jsonLd = JSON.stringify([
     content.element = container;
   });
 
-  lightbox.on('contentActivate', ({ content }) => {
-    const video = content.element?.querySelector('video');
-    if (video) video.play();
-  });
-
-  function pauseAllVideos() {
-    document.querySelectorAll('video').forEach((v) => {
-      (v as HTMLVideoElement).pause();
-    });
+  function playVideo(video: HTMLVideoElement) {
+    const attempt = () => video.play().catch(() => {});
+    // On mobile the video element may not have buffered data yet when the
+    // slide activates — wait for canplay rather than calling play() blind
+    if (video.readyState >= 2) {
+      attempt();
+    } else {
+      video.addEventListener('canplay', attempt, { once: true });
+    }
   }
 
-  lightbox.on('contentDeactivate', () => pauseAllVideos());
-  lightbox.on('close', () => pauseAllVideos());
-  lightbox.on('destroy', () => pauseAllVideos());
+  lightbox.on('contentActivate', ({ content }) => {
+    const video = content.element?.querySelector('video') as HTMLVideoElement | null;
+    if (video) playVideo(video);
+  });
+
+  lightbox.on('contentDeactivate', ({ content }) => {
+    // Pause only this slide's video — pauseAllVideos() would also pause
+    // preloaded adjacent slides and race with the next contentActivate
+    const video = content.element?.querySelector('video') as HTMLVideoElement | null;
+    if (video) video.pause();
+  });
+
+  const pauseAll = () => document.querySelectorAll('video').forEach((v) => (v as HTMLVideoElement).pause());
+  lightbox.on('close', pauseAll);
+  lightbox.on('destroy', pauseAll);
 
   lightbox.init();
-</script>
-
-<script>
-  // Gallery category filtering
-  const tabs = document.querySelectorAll<HTMLButtonElement>(".filter-tab");
-  const items = document.querySelectorAll<HTMLElement>(".gallery-item, .gallery-placeholder-card");
-
-  tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      const category = tab.dataset.category;
-
-      tabs.forEach((t) => {
-        t.classList.remove("active");
-        t.setAttribute("aria-selected", "false");
-      });
-      tab.classList.add("active");
-      tab.setAttribute("aria-selected", "true");
-
-      let visibleCount = 0;
-      items.forEach((item) => {
-        if (category === "All" || item.dataset.category === category) {
-          item.style.display = "";
-          visibleCount++;
-        } else {
-          item.style.display = "none";
-        }
-      });
-
-      // Announce filter result to screen readers
-      const status = document.getElementById("gallery-status");
-      if (status) {
-        status.textContent = `Showing ${visibleCount} photo${visibleCount !== 1 ? "s" : ""} for ${category}`;
-      }
-
-      // Regenerate carousel dots after filtering
-      document.dispatchEvent(new CustomEvent("carousel:update"));
-    });
-  });
 </script>
 
 <script>
