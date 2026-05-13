@@ -215,10 +215,7 @@ const formattedDate = data.date.toLocaleDateString("en-GB", {
 
     function showBadge(badge, status, remaining) {
       badge.className = "availability-badge";
-      if (status === "available") {
-        badge.classList.add("availability-badge--available");
-        badge.textContent = "Tickets available";
-      } else if (status === "low") {
+      if (status === "low") {
         badge.classList.add("availability-badge--low");
         badge.textContent = `Only ${remaining} ticket${remaining === 1 ? "" : "s"} left`;
       } else if (status === "sold_out") {

@@ -1488,11 +1488,8 @@ const jsonLd = JSON.stringify([
     try {
       const res = await fetch(`/api/event-availability?slug=${slug}`);
       const data = await res.json();
-      if (data.status === "available") {
-        el.textContent = "Tickets available";
-        el.className = "event-availability event-availability--available";
-      } else if (data.status === "low") {
-        el.textContent = `Only ${data.remaining} left`;
+      if (data.status === "low") {
+        el.textContent = `Only ${data.remaining} tickets left`;
         el.className = "event-availability event-availability--low";
       } else if (data.status === "sold_out") {
         el.textContent = "Sold out";
