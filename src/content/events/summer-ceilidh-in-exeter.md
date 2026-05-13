@@ -7,7 +7,7 @@ description: Join us for an evening of lively ceilidh dancing! No experience or
   partner needed. Gender free calling. Suitable for all ages. Doors open 6:45pm,
   dancing from 7:00pm to 9:00pm.
 ticketingEnabled: true
-capacity: 50
+capacity: 1
 tiers:
   - name: Test
     price: 10
