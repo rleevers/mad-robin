@@ -564,7 +564,8 @@ const jsonLd = JSON.stringify([
             title="Upcoming Events"
             subtitle="Come see us live"
           />
-          <SwipeCarousel id="carousel-events" label="Upcoming events" desktopGrid="1fr" cardMinWidth="92%" class="events-grid">
+          <div class="events-grid">
+          <SwipeCarousel id="carousel-events" label="Upcoming events" desktopGrid="1fr" cardMinWidth="92%">
             {upcomingEvents.map((e) => (
               <div class="event-card">
                 <div class="event-date-badge">
@@ -624,6 +625,7 @@ const jsonLd = JSON.stringify([
               </div>
             ))}
           </SwipeCarousel>
+          </div>
           <div class="events-subscribe">
             <p class="events-subscribe-label">Subscribe to all events</p>
             <div class="events-subscribe-links">
@@ -1164,6 +1166,10 @@ const jsonLd = JSON.stringify([
   .events-grid {
     max-width: 800px;
     margin: 0 auto;
+  }
+
+  .events-grid :global(.carousel) {
+    gap: var(--space-lg);
   }
 
   .event-card {

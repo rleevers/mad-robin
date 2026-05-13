@@ -160,7 +160,9 @@ const {
       const dotsContainer = carousel.querySelector<HTMLElement>(".carousel-dots");
       if (!track || !dotsContainer) return;
 
-      const cards = Array.from(track.children) as HTMLElement[];
+      const cards = Array.from(track.children).filter(
+        (el) => (el as HTMLElement).style.display !== "none"
+      ) as HTMLElement[];
       if (cards.length === 0) return;
 
       // Build dots
