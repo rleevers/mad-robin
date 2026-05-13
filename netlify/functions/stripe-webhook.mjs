@@ -51,6 +51,7 @@ export const handler = async (event) => {
     try {
       await resend.emails.send({
         from: process.env.FROM_EMAIL,
+        reply_to: "madrobinband@gmail.com",
         to: order.buyer_email,
         subject: `Your tickets — ${order.event_title}`,
         html: buildEmail({ order, totalAmount }),
@@ -113,7 +114,7 @@ function buildEmail({ order, totalAmount }) {
       </div>
 
       <p style="margin:0;font-size:13px;color:#8a9a88;">
-        Questions? Reply to this email or contact us at
+        Questions? Contact us at
         <a href="mailto:madrobinband@gmail.com" style="color:#c23b22;">madrobinband@gmail.com</a>
       </p>
     </div>
