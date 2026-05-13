@@ -607,20 +607,22 @@ const jsonLd = JSON.stringify([
                     <p class="event-venue">{e.data.venue}</p>
                   )}
                   <p class="event-desc">{e.data.description}</p>
-                  {e.data.tiers && e.data.tiers.length > 0 && (
-                    <p class="event-price">
-                      {e.data.tiers.map((t: {name: string, price: number}, i: number) => (
-                        <span>{t.name}: £{t.price.toFixed(2)}{i < (e.data.tiers?.length ?? 0) - 1 ? " · " : ""}</span>
-                      ))}
-                    </p>
-                  )}
-                  {e.data.capacity && (
-                    <span class="event-availability" data-slug={e.id} aria-live="polite"></span>
-                  )}
-                  {e.data.capacity ? (
-                    <a href={`/events/${e.id}`} class="event-ticket-link">
-                      Get Tickets &rarr;
-                    </a>
+                  {e.data.tiers && e.data.tiers.length > 0 ? (
+                    <div class="event-ticket-row">
+                      <span class="event-price">
+                        {e.data.tiers.map((t: {name: string, price: number}, i: number) => (
+                          <span>{t.name}: £{t.price.toFixed(2)}{i < (e.data.tiers?.length ?? 0) - 1 ? " · " : ""}</span>
+                        ))}
+                      </span>
+                      {e.data.capacity && (
+                        <span class="event-availability" data-slug={e.id} aria-live="polite"></span>
+                      )}
+                      {e.data.capacity && (
+                        <a href={`/events/${e.id}`} class="event-ticket-link">
+                          Get Tickets &rarr;
+                        </a>
+                      )}
+                    </div>
                   ) : e.data.ticketPrice && (
                     <p class="event-price">{e.data.ticketPrice}</p>
                   )}
@@ -1269,6 +1271,13 @@ const jsonLd = JSON.stringify([
     font-size: var(--text-sm);
     font-weight: 700;
     color: var(--color-accent-gold);
+  }
+
+  .event-ticket-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
     margin-top: var(--space-sm);
   }
 
@@ -1276,7 +1285,6 @@ const jsonLd = JSON.stringify([
     display: inline-block;
     font-size: var(--text-sm);
     font-weight: 700;
-    margin-top: var(--space-sm);
   }
 
   .event-availability {
@@ -1285,7 +1293,6 @@ const jsonLd = JSON.stringify([
     font-weight: 700;
     padding: 0.2rem 0.6rem;
     border-radius: var(--radius-full);
-    margin-top: var(--space-sm);
   }
 
   .event-availability--available { background: #e6f4e6; color: #2d6b2d; }
