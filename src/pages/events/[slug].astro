@@ -1,0 +1,735 @@
+---
+import { getCollection } from "astro:content";
+import PageLayout from "@/layouts/PageLayout.astro";
+
+export async function getStaticPaths() {
+  const events = await getCollection("events");
+  return events.map((event) => ({
+    params: { slug: event.id },
+    props: { event },
+  }));
+}
+
+const { event } = Astro.props;
+const { data } = event;
+
+const hasTicketing = data.tiers && data.tiers.length > 0 && data.capacity;
+const isPast = data.date < new Date();
+const stripeKey = import.meta.env.STRIPE_PUBLISHABLE_KEY ?? "";
+
+const formattedDate = data.date.toLocaleDateString("en-GB", {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+---
+
+<PageLayout
+  title={`${data.title} — Mad Robin`}
+  description={data.description}
+>
+  <section class="event-hero">
+    <div class="container container--narrow">
+      <a href="/#events" class="back-link">&larr; All events</a>
+
+      <div class="event-header">
+        <div class="event-date-badge">
+          <span class="event-day">{data.date.getDate()}</span>
+          <span class="event-month">
+            {data.date.toLocaleDateString("en-GB", { month: "short" })}
+          </span>
+        </div>
+        <div class="event-header-text">
+          <h1>{data.title}</h1>
+          <p class="event-meta-line">
+            {formattedDate}
+            {data.startTime && <span class="event-time"> &middot; {data.startTime}</span>}
+          </p>
+          {data.mapLink ? (
+            <a href={data.mapLink} target="_blank" rel="noopener noreferrer" class="event-venue-link">
+              {data.venue} ↗
+            </a>
+          ) : (
+            <p class="event-venue-plain">{data.venue}</p>
+          )}
+        </div>
+      </div>
+
+      <p class="event-description">{data.description}</p>
+
+      {hasTicketing && data.tiers && (
+        <p class="event-price-line">
+          {data.tiers.map((t, i) => (
+            <span>
+              {t.name}: <strong>&pound;{t.price.toFixed(2)}</strong>
+              {i < (data.tiers?.length ?? 0) - 1 ? " · " : ""}
+            </span>
+          ))}
+        </p>
+      )}
+    </div>
+  </section>
+
+  <section class="booking-section">
+    <div class="container container--narrow">
+
+      {hasTicketing && !isPast ? (
+        <>
+          <div id="availability-badge" class="availability-badge availability-badge--loading">
+            Checking availability&hellip;
+          </div>
+
+          <div id="booking-form-wrap" class="booking-card" style="display:none">
+            <h2>Book Tickets</h2>
+
+            <form id="booking-form" novalidate>
+              <div class="form-field">
+                <label for="buyer-name">Your name</label>
+                <input
+                  type="text"
+                  id="buyer-name"
+                  required
+                  autocomplete="name"
+                  placeholder="Jane Smith"
+                />
+              </div>
+
+              <div class="form-field">
+                <label for="buyer-email">Email address</label>
+                <input
+                  type="email"
+                  id="buyer-email"
+                  required
+                  autocomplete="email"
+                  placeholder="jane@example.com"
+                />
+                <p class="field-hint">Confirmation sent here</p>
+              </div>
+
+              <div class="tiers-section">
+                {data.tiers!.map((tier) => (
+                  <div class="tier-row" data-price={tier.price} data-name={tier.name}>
+                    <div class="tier-info">
+                      <span class="tier-name">{tier.name}</span>
+                      <span class="tier-price">&pound;{tier.price.toFixed(2)}</span>
+                    </div>
+                    <div class="tier-qty">
+                      <button type="button" class="qty-btn qty-minus" aria-label={`Remove ${tier.name}`}>−</button>
+                      <span class="qty-val">0</span>
+                      <button type="button" class="qty-btn qty-plus" aria-label={`Add ${tier.name}`}>+</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div id="total-row" class="total-row" style="display:none">
+                <span>Total</span>
+                <span id="total-amount" class="total-amount">&pound;0.00</span>
+              </div>
+
+              <p id="form-error" class="form-error" style="display:none"></p>
+
+              <button type="submit" id="submit-btn" class="btn btn--primary btn--lg submit-btn" disabled>
+                Buy Tickets
+              </button>
+            </form>
+          </div>
+
+          <div id="payment-wrap" class="booking-card" style="display:none">
+            <h2>Payment</h2>
+            <p id="payment-summary" class="payment-summary"></p>
+            <div id="payment-element"></div>
+            <p id="payment-error" class="form-error" style="display:none"></p>
+            <button id="pay-btn" class="btn btn--primary btn--lg submit-btn" style="margin-top:1.5rem">
+              Pay <span id="pay-amount"></span>
+            </button>
+            <button id="back-btn" class="btn--back-link">
+              &larr; Change tickets
+            </button>
+          </div>
+
+          <div id="success-wrap" class="booking-card success-card" style="display:none">
+            <div class="success-icon" aria-hidden="true">✓</div>
+            <h2>You&rsquo;re booked in!</h2>
+            <p>
+              We&rsquo;ve sent a confirmation to <strong id="confirm-email"></strong>.
+            </p>
+            <p class="success-note">Just tell us your name at the door &mdash; no need to print anything.</p>
+            <a href="/#events" class="btn btn--outline btn--md" style="margin-top:1.5rem">Back to events</a>
+          </div>
+
+          <div id="soldout-wrap" class="soldout-card" style="display:none">
+            <h2>Sold Out</h2>
+            <p>Sorry, this event is fully booked.</p>
+          </div>
+        </>
+      ) : isPast ? (
+        <p class="past-note">This event has already taken place.</p>
+      ) : (
+        <p class="past-note">Tickets are not available for this event.</p>
+      )}
+
+    </div>
+  </section>
+</PageLayout>
+
+{hasTicketing && !isPast && (
+  <script define:vars={{
+    eventSlug: event.id,
+    stripeKey,
+    tiers: data.tiers,
+    eventTitle: data.title,
+    eventVenue: data.venue,
+  }}>
+    let stripeInst = null;
+    let elementsInst = null;
+    let totalTickets = 0;
+    let totalAmount = 0;
+    let buyerEmail = "";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      checkAvailability();
+      setupQuantityButtons();
+      setupForm();
+      setupPayButton();
+      setupBackButton();
+    });
+
+    async function checkAvailability() {
+      const badge = document.getElementById("availability-badge");
+      try {
+        const res = await fetch(`/api/event-availability?slug=${eventSlug}`);
+        const data = await res.json();
+        showBadge(badge, data.status, data.remaining);
+        if (data.status === "sold_out") {
+          document.getElementById("soldout-wrap").style.display = "block";
+        } else {
+          document.getElementById("booking-form-wrap").style.display = "block";
+        }
+      } catch {
+        badge.style.display = "none";
+        document.getElementById("booking-form-wrap").style.display = "block";
+      }
+    }
+
+    function showBadge(badge, status, remaining) {
+      badge.className = "availability-badge";
+      if (status === "low") {
+        badge.classList.add("availability-badge--low");
+        badge.textContent = `Only ${remaining} ticket${remaining === 1 ? "" : "s"} left`;
+      } else if (status === "sold_out") {
+        badge.classList.add("availability-badge--soldout");
+        badge.textContent = "Sold out";
+      } else {
+        badge.style.display = "none";
+      }
+    }
+
+    function setupQuantityButtons() {
+      document.querySelectorAll(".tier-row").forEach((row) => {
+        row.querySelector(".qty-minus").addEventListener("click", () => {
+          const val = row.querySelector(".qty-val");
+          const n = parseInt(val.textContent, 10);
+          if (n > 0) { val.textContent = n - 1; recalc(); }
+        });
+        row.querySelector(".qty-plus").addEventListener("click", () => {
+          const val = row.querySelector(".qty-val");
+          const n = parseInt(val.textContent, 10);
+          if (totalTickets < 8) { val.textContent = n + 1; recalc(); }
+        });
+      });
+    }
+
+    function recalc() {
+      totalTickets = 0;
+      totalAmount = 0;
+      document.querySelectorAll(".tier-row").forEach((row) => {
+        const qty = parseInt(row.querySelector(".qty-val").textContent, 10);
+        const price = parseFloat(row.dataset.price);
+        totalTickets += qty;
+        totalAmount += qty * price;
+      });
+
+      const totalRow = document.getElementById("total-row");
+      const totalEl = document.getElementById("total-amount");
+      const submitBtn = document.getElementById("submit-btn");
+
+      if (totalTickets > 0) {
+        totalRow.style.display = "flex";
+        totalEl.textContent = `£${totalAmount.toFixed(2)}`;
+        submitBtn.disabled = false;
+        submitBtn.textContent = `Buy Tickets — £${totalAmount.toFixed(2)}`;
+      } else {
+        totalRow.style.display = "none";
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Buy Tickets";
+      }
+
+      document.querySelectorAll(".qty-plus").forEach((btn) => {
+        btn.disabled = totalTickets >= 8;
+      });
+    }
+
+    function setupForm() {
+      document.getElementById("booking-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = document.getElementById("buyer-name").value.trim();
+        const email = document.getElementById("buyer-email").value.trim();
+        const errEl = document.getElementById("form-error");
+
+        if (!name || !email) {
+          errEl.textContent = "Please enter your name and email address.";
+          errEl.style.display = "block";
+          return;
+        }
+        if (totalTickets === 0) {
+          errEl.textContent = "Please select at least one ticket.";
+          errEl.style.display = "block";
+          return;
+        }
+        errEl.style.display = "none";
+
+        const submitBtn = document.getElementById("submit-btn");
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Processing…";
+
+        const tickets = [];
+        document.querySelectorAll(".tier-row").forEach((row) => {
+          const qty = parseInt(row.querySelector(".qty-val").textContent, 10);
+          if (qty > 0) {
+            tickets.push({ name: row.dataset.name, quantity: qty, price: parseFloat(row.dataset.price) });
+          }
+        });
+
+        try {
+          const res = await fetch("/api/create-checkout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ event_slug: eventSlug, event_title: eventTitle, event_venue: eventVenue, tickets, buyer_name: name, buyer_email: email }),
+          });
+          const data = await res.json();
+
+          if (!res.ok) {
+            if (res.status === 409) {
+              errEl.textContent = data.remaining === 0
+                ? "Sorry, this event has just sold out."
+                : `Sorry, only ${data.remaining} ticket${data.remaining === 1 ? "" : "s"} remaining.`;
+            } else {
+              errEl.textContent = data.error || "Something went wrong. Please try again.";
+            }
+            errEl.style.display = "block";
+            submitBtn.disabled = false;
+            submitBtn.textContent = `Buy Tickets — £${totalAmount.toFixed(2)}`;
+            return;
+          }
+
+          buyerEmail = email;
+          await mountPaymentElement(data.clientSecret, name);
+        } catch {
+          errEl.textContent = "Something went wrong. Please try again.";
+          errEl.style.display = "block";
+          submitBtn.disabled = false;
+          submitBtn.textContent = `Buy Tickets — £${totalAmount.toFixed(2)}`;
+        }
+      });
+    }
+
+    async function loadStripeJs() {
+      if (window.Stripe) return;
+      await new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = "https://js.stripe.com/v3/";
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    async function mountPaymentElement(clientSecret, name) {
+      document.getElementById("booking-form-wrap").style.display = "none";
+      const payWrap = document.getElementById("payment-wrap");
+      payWrap.style.display = "block";
+
+      document.getElementById("payment-summary").textContent =
+        `${totalTickets} ticket${totalTickets === 1 ? "" : "s"} — £${totalAmount.toFixed(2)}`;
+      document.getElementById("pay-amount").textContent = `£${totalAmount.toFixed(2)}`;
+      payWrap.dataset.name = name;
+
+      await loadStripeJs();
+      if (!stripeInst) stripeInst = window.Stripe(stripeKey);
+
+      elementsInst = stripeInst.elements({ clientSecret });
+      const payEl = elementsInst.create("payment", { layout: "tabs" });
+      payEl.mount("#payment-element");
+    }
+
+    function setupPayButton() {
+      document.getElementById("pay-btn").addEventListener("click", async () => {
+        const payBtn = document.getElementById("pay-btn");
+        const errEl = document.getElementById("payment-error");
+        payBtn.disabled = true;
+        payBtn.textContent = "Processing…";
+        errEl.style.display = "none";
+
+        const { error } = await stripeInst.confirmPayment({
+          elements: elementsInst,
+          redirect: "if_required",
+          confirmParams: { return_url: window.location.href },
+        });
+
+        if (error) {
+          errEl.textContent = error.message;
+          errEl.style.display = "block";
+          payBtn.disabled = false;
+          payBtn.textContent = `Pay £${totalAmount.toFixed(2)}`;
+        } else {
+          document.getElementById("payment-wrap").style.display = "none";
+          document.getElementById("success-wrap").style.display = "block";
+          document.getElementById("confirm-email").textContent = buyerEmail;
+        }
+      });
+    }
+
+    function setupBackButton() {
+      document.getElementById("back-btn").addEventListener("click", () => {
+        document.getElementById("payment-wrap").style.display = "none";
+        document.getElementById("booking-form-wrap").style.display = "block";
+        const submitBtn = document.getElementById("submit-btn");
+        submitBtn.disabled = false;
+        submitBtn.textContent = `Buy Tickets — £${totalAmount.toFixed(2)}`;
+      });
+    }
+  </script>
+)}
+
+<style>
+  .event-hero {
+    padding: var(--space-2xl) 0 var(--space-xl);
+    background: var(--color-bg-primary);
+  }
+
+  .back-link {
+    display: inline-block;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    margin-bottom: var(--space-xl);
+  }
+  .back-link:hover { color: var(--color-accent-gold); }
+
+  .event-header {
+    display: flex;
+    gap: var(--space-lg);
+    align-items: flex-start;
+    margin-bottom: var(--space-lg);
+  }
+
+  .event-date-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 64px;
+    padding: var(--space-sm);
+    background: var(--color-accent-gold);
+    border-radius: var(--radius-md);
+    color: var(--color-text-on-accent);
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .event-day {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .event-month {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .event-header-text h1 {
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-xs);
+  }
+
+  .event-meta-line {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-xs);
+  }
+
+  .event-venue-link, .event-venue-plain {
+    font-size: var(--text-sm);
+    color: var(--color-accent-copper);
+    text-decoration: none;
+    display: block;
+  }
+  .event-venue-link:hover { text-decoration: underline; }
+
+  .event-description {
+    font-size: var(--text-lg);
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-md);
+  }
+
+  .event-price-line {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  /* --- Booking section --- */
+  .booking-section {
+    padding: var(--space-xl) 0 var(--space-3xl);
+    background: var(--color-bg-secondary);
+    min-height: 200px;
+  }
+
+  .availability-badge {
+    display: inline-block;
+    font-size: var(--text-sm);
+    font-weight: 700;
+    padding: 0.35rem 0.9rem;
+    border-radius: var(--radius-full);
+    margin-bottom: var(--space-lg);
+  }
+
+  .availability-badge--loading {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-muted);
+  }
+
+  .availability-badge--available {
+    background: #e6f4e6;
+    color: #2d6b2d;
+  }
+
+  .availability-badge--low {
+    background: #fef3cd;
+    color: #856404;
+  }
+
+  .availability-badge--soldout {
+    background: #fce8e8;
+    color: #c23b22;
+  }
+
+  .booking-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+  }
+
+  .booking-card h2 {
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-xl);
+  }
+
+  /* --- Form fields --- */
+  .form-field {
+    margin-bottom: var(--space-lg);
+  }
+
+  .form-field label {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-xs);
+  }
+
+  .form-field input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    font-family: var(--font-body);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    transition: border-color var(--transition-fast);
+  }
+
+  .form-field input:focus {
+    outline: none;
+    border-color: var(--color-accent-gold);
+  }
+
+  .field-hint {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    margin-top: var(--space-xs);
+  }
+
+  /* --- Tiers --- */
+  .tiers-section {
+    margin: var(--space-xl) 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .tier-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--color-border-light);
+    background: var(--color-bg-primary);
+  }
+
+  .tier-row:last-child { border-bottom: none; }
+
+  .tier-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .tier-name {
+    font-weight: 700;
+    font-size: var(--text-base);
+    color: var(--color-text-primary);
+  }
+
+  .tier-price {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .tier-qty {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .qty-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-card);
+    color: var(--color-text-primary);
+    font-size: var(--text-lg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    line-height: 1;
+  }
+
+  .qty-btn:hover:not(:disabled) {
+    border-color: var(--color-accent-gold);
+    color: var(--color-accent-gold);
+  }
+
+  .qty-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .qty-val {
+    font-size: var(--text-lg);
+    font-weight: 700;
+    min-width: 24px;
+    text-align: center;
+    color: var(--color-text-primary);
+  }
+
+  /* --- Total --- */
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-md) 0;
+    border-top: 2px solid var(--color-border);
+    margin-bottom: var(--space-lg);
+    font-weight: 700;
+    font-size: var(--text-base);
+  }
+
+  .total-amount {
+    font-size: var(--text-xl);
+    color: var(--color-accent-gold);
+  }
+
+  .form-error {
+    color: var(--color-error);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background: #fce8e8;
+    border-radius: var(--radius-sm);
+  }
+
+  .submit-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* --- Payment --- */
+  .payment-summary {
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-lg);
+  }
+
+  .btn--back-link {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    padding: var(--space-sm);
+    margin-top: var(--space-sm);
+  }
+  .btn--back-link:hover { color: var(--color-text-primary); }
+
+  /* --- Success --- */
+  .success-card {
+    text-align: center;
+  }
+
+  .success-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--color-accent-terracotta);
+    color: #fff;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--space-lg);
+  }
+
+  .success-card h2 { margin-bottom: var(--space-sm); }
+
+  .success-note {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  /* --- Sold out / past --- */
+  .soldout-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    text-align: center;
+  }
+
+  .past-note {
+    color: var(--color-text-muted);
+    font-size: var(--text-base);
+  }
+</style>

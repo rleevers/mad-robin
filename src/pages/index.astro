@@ -4,6 +4,7 @@ import SectionHeading from "@/components/ui/SectionHeading.astro";
 import Button from "@/components/ui/Button.astro";
 import PlaceholderImage from "@/components/ui/PlaceholderImage.astro";
 import SwipeCarousel from "@/components/ui/SwipeCarousel.astro";
+import CalendarButtons from "@/components/ui/CalendarButtons.astro";
 import { Image } from "astro:assets";
 import heroLogo from "@/assets/images/logo.png";
 import heroBand from "@/assets/images/hero-band.jpg";
@@ -36,6 +37,13 @@ const faqItems = allFaq.sort((a, b) => a.data.sortOrder - b.data.sortOrder);
 const allExpect = await getCollection("whatToExpect");
 const expectItems = allExpect.sort((a, b) => a.data.sortOrder - b.data.sortOrder);
 
+function formatTime12h(time: string): string {
+  const [h, m] = time.split(":").map(Number);
+  const period = h >= 12 ? "pm" : "am";
+  const hour = h % 12 || 12;
+  return m === 0 ? `${hour}${period}` : `${hour}:${String(m).padStart(2, "0")}${period}`;
+}
+
 // Extract YouTube video ID from various URL formats
 function getYouTubeId(url: string): string | null {
   if (!url) return null;
@@ -57,7 +65,9 @@ const eventsJsonLd = upcomingEvents.map((e) => ({
   "@context": "https://schema.org",
   "@type": "Event",
   name: e.data.title,
-  startDate: e.data.date.toISOString().split("T")[0],
+  startDate: e.data.startTime
+    ? `${e.data.date.toISOString().split("T")[0]}T${e.data.startTime}:00`
+    : e.data.date.toISOString().split("T")[0],
   location: {
     "@type": "Place",
     name: e.data.venue,
@@ -576,6 +586,11 @@ const jsonLd = JSON.stringify([
                       month: "short",
                     })}
                   </span>
+                  {e.data.startTime && (
+                    <span class="event-time">
+                      {formatTime12h(e.data.startTime)}
+                    </span>
+                  )}
                 </div>
                 <div class="event-info">
                   <h3>{e.data.title}</h3>
@@ -592,17 +607,56 @@ const jsonLd = JSON.stringify([
                     <p class="event-venue">{e.data.venue}</p>
                   )}
                   <p class="event-desc">{e.data.description}</p>
-                  {e.data.ticketPrice && (
+                  {e.data.tiers && e.data.tiers.length > 0 ? (
+                    <div class="event-ticket-row">
+                      <span class="event-price">
+                        {e.data.tiers.map((t: {name: string, price: number}, i: number) => (
+                          <span>{t.name}: £{t.price.toFixed(2)}{i < (e.data.tiers?.length ?? 0) - 1 ? " · " : ""}</span>
+                        ))}
+                      </span>
+                      {e.data.capacity && (
+                        <span class="event-availability" data-slug={e.id} aria-live="polite"></span>
+                      )}
+                      {e.data.capacity && (
+                        <a href={`/events/${e.id}`} class="event-ticket-link">
+                          Get Tickets &rarr;
+                        </a>
+                      )}
+                    </div>
+                  ) : e.data.ticketPrice && (
                     <p class="event-price">{e.data.ticketPrice}</p>
                   )}
-                  {e.data.ticketLink && (
-                    <a href={e.data.ticketLink} class="event-ticket-link" target="_blank" rel="noopener noreferrer">
-                      Get Tickets &rarr;
-                    </a>
-                  )}
+                  <CalendarButtons
+                    id={e.id}
+                    title={e.data.title}
+                    date={e.data.date}
+                    startTime={e.data.startTime}
+                    venue={e.data.venue}
+                    address={e.data.address}
+                    description={e.data.description}
+                    ticketPrice={e.data.tiers ? e.data.tiers.map((t: {name: string, price: number}) => `${t.name}: £${t.price.toFixed(2)}`).join(", ") : e.data.ticketPrice}
+                    ticketLink={e.data.capacity ? `https://madrobinband.co.uk/events/${e.id}` : undefined}
+                  />
                 </div>
               </div>
             ))}
+          </div>
+          <div class="events-subscribe">
+            <p class="events-subscribe-label">Subscribe to all events</p>
+            <div class="events-subscribe-links">
+              <a
+                href={`https://calendar.google.com/calendar/r?cid=${encodeURIComponent("https://madrobinceilidh.co.uk/events/feed.ics")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="cal-btn"
+              >
+                + Google Calendar
+              </a>
+              <a href="webcal://madrobinceilidh.co.uk/events/feed.ics" class="cal-btn">
+                + iCal / Outlook
+              </a>
+            </div>
+            <span class="events-subscribe-hint">stay up to date as new gigs are added</span>
           </div>
         </div>
       </section>
@@ -1181,6 +1235,13 @@ const jsonLd = JSON.stringify([
     text-transform: uppercase;
   }
 
+  .event-time {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    margin-top: 0.2rem;
+    opacity: 0.85;
+  }
+
   .event-info h3 {
     font-size: var(--text-lg);
     margin-bottom: var(--space-xs);
@@ -1210,6 +1271,13 @@ const jsonLd = JSON.stringify([
     font-size: var(--text-sm);
     font-weight: 700;
     color: var(--color-accent-gold);
+  }
+
+  .event-ticket-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
     margin-top: var(--space-sm);
   }
 
@@ -1217,6 +1285,63 @@ const jsonLd = JSON.stringify([
     display: inline-block;
     font-size: var(--text-sm);
     font-weight: 700;
+  }
+
+  .event-availability {
+    display: inline-block;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-full);
+  }
+
+  .event-availability--available { background: #e6f4e6; color: #2d6b2d; }
+  .event-availability--low { background: #fef3cd; color: #856404; }
+  .event-availability--soldout { background: #fce8e8; color: #c23b22; }
+
+  .events-subscribe {
+    text-align: center;
+    margin-top: var(--space-lg);
+  }
+
+  .events-subscribe-label {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-sm);
+  }
+
+  .events-subscribe-links {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .events-subscribe-links .cal-btn {
+    display: inline-block;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-decoration: none;
+    padding: 0.3rem 0.7rem;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--color-border);
+    color: var(--color-text-secondary);
+    background: transparent;
+    transition:
+      border-color var(--transition-fast),
+      color var(--transition-fast);
+  }
+
+  .events-subscribe-links .cal-btn:hover {
+    border-color: var(--color-accent-gold);
+    color: var(--color-accent-gold);
+  }
+
+  .events-subscribe-hint {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
     margin-top: var(--space-sm);
   }
 
@@ -1352,5 +1477,26 @@ const jsonLd = JSON.stringify([
       // Regenerate carousel dots after filtering
       document.dispatchEvent(new CustomEvent("carousel:update"));
     });
+  });
+</script>
+
+<script>
+  // Load live availability badges on event cards
+  document.querySelectorAll<HTMLElement>(".event-availability").forEach(async (el) => {
+    const slug = el.dataset.slug;
+    if (!slug) return;
+    try {
+      const res = await fetch(`/api/event-availability?slug=${slug}`);
+      const data = await res.json();
+      if (data.status === "low") {
+        el.textContent = `Only ${data.remaining} tickets left`;
+        el.className = "event-availability event-availability--low";
+      } else if (data.status === "sold_out") {
+        el.textContent = "Sold out";
+        el.className = "event-availability event-availability--soldout";
+      }
+    } catch {
+      // Silently fail — availability badge is non-critical
+    }
   });
 </script>
