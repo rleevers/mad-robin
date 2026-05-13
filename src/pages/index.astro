@@ -29,7 +29,6 @@ const members = allMembers.sort((a, b) => a.data.sortOrder - b.data.sortOrder);
 const allGallery = await getCollection("gallery");
 const galleryItems = allGallery.sort((a, b) => a.data.sortOrder - b.data.sortOrder);
 const galleryCategories = ["All", "Weddings", "Barn Dances", "Private", "Public"];
-const GALLERY_PREVIEW = 6;
 
 const allFaq = await getCollection("faq");
 const faqItems = allFaq.sort((a, b) => a.data.sortOrder - b.data.sortOrder);
@@ -355,7 +354,7 @@ const jsonLd = JSON.stringify([
       <div class="gallery-grid" id="gallery-grid">
         {
           galleryItems.length > 0
-            ? galleryItems.map((item, idx) => (
+            ? galleryItems.map((item) => (
                 <a
                   href={item.data.image || "#"}
                   class:list={[
@@ -366,7 +365,6 @@ const jsonLd = JSON.stringify([
                   data-category={item.data.category}
                   data-pswp-width={item.data.video && !item.data.image ? "1280" : ""}
                   data-pswp-height={item.data.video && !item.data.image ? "720" : ""}
-                  style={idx >= GALLERY_PREVIEW ? "display:none" : ""}
                   {...(item.data.video ? { "data-video-src": item.data.video } : {})}
                 >
                   {item.data.image ? (
