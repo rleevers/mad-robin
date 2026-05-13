@@ -535,7 +535,7 @@ const jsonLd = JSON.stringify([
 
     <div class="container">
       <h3 class="expect-heading">What to Expect</h3>
-      <SwipeCarousel id="carousel-expect" label="What to expect at a ceilidh" class="expect-grid">
+      <SwipeCarousel id="carousel-expect" label="What to expect at a ceilidh" class="expect-grid" desktopGrid="repeat(2, 1fr)">
         {expectItems.map(async (item) => {
           const { Content } = await render(item);
           return (
