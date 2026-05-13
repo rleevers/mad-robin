@@ -21,6 +21,11 @@
   to = "/.netlify/functions/stripe-webhook"
   status = 200
 
+[[redirects]]
+  from = "/api/door-list"
+  to = "/.netlify/functions/door-list"
+  status = 200
+
 # Redirect /admin to /admin/
 [[redirects]]
   from = "/admin"

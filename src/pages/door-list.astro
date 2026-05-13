@@ -1,0 +1,358 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const allEvents = await getCollection("events");
+const ticketedEvents = allEvents
+  .filter((e) => e.data.capacity)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<BaseLayout title="Door List — Mad Robin" noindex={true}>
+  <div class="page">
+
+    <div id="auth-screen" class="screen">
+      <h1>Door List</h1>
+      <form id="auth-form" class="card">
+        <div class="field">
+          <label for="event-select">Event</label>
+          <select id="event-select" required>
+            <option value="">Select an event…</option>
+            {ticketedEvents.map((e) => (
+              <option value={e.id}>
+                {e.data.title} — {e.data.date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" required autocomplete="current-password" />
+        </div>
+        <p id="auth-error" class="error" style="display:none">Incorrect password.</p>
+        <button type="submit" class="btn">View Door List</button>
+      </form>
+    </div>
+
+    <div id="list-screen" class="screen" style="display:none">
+      <div class="list-header no-print">
+        <button id="back-btn" class="back-link">← Back</button>
+        <button id="print-btn" class="btn">Print / Save as PDF</button>
+      </div>
+
+      <div class="print-header">
+        <h1 id="event-title"></h1>
+        <p id="event-meta"></p>
+      </div>
+
+      <div id="loading" class="loading">Loading…</div>
+      <div id="error-msg" class="error" style="display:none"></div>
+
+      <div id="list-content" style="display:none">
+        <div class="summary">
+          <span id="summary-text"></span>
+        </div>
+        <table id="door-table">
+          <thead>
+            <tr>
+              <th class="col-name">Name</th>
+              <th class="col-tickets">Tickets</th>
+              <th class="col-total">Total</th>
+              <th class="col-check">✓</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+        <p class="print-footer">Printed from madrobinband.co.uk &mdash; <span id="print-date"></span></p>
+      </div>
+    </div>
+
+  </div>
+</BaseLayout>
+
+<script>
+  const authScreen = document.getElementById("auth-screen")!;
+  const listScreen = document.getElementById("list-screen")!;
+  const authForm = document.getElementById("auth-form") as HTMLFormElement;
+  const authError = document.getElementById("auth-error")!;
+  const loading = document.getElementById("loading")!;
+  const errorMsg = document.getElementById("error-msg")!;
+  const listContent = document.getElementById("list-content")!;
+  const tableBody = document.getElementById("table-body")!;
+  const summaryText = document.getElementById("summary-text")!;
+  const eventTitle = document.getElementById("event-title")!;
+  const eventMeta = document.getElementById("event-meta")!;
+
+  let currentPassword = "";
+  let currentSlug = "";
+
+  authForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const slug = (document.getElementById("event-select") as HTMLSelectElement).value;
+    const password = (document.getElementById("password") as HTMLInputElement).value;
+    const selectedOption = (document.getElementById("event-select") as HTMLSelectElement).selectedOptions[0];
+
+    if (!slug || !password) return;
+
+    currentPassword = password;
+    currentSlug = slug;
+
+    authScreen.style.display = "none";
+    listScreen.style.display = "block";
+    eventTitle.textContent = selectedOption.text.split(" — ")[0];
+    eventMeta.textContent = selectedOption.text.split(" — ")[1] ?? "";
+
+    await loadList(slug, password);
+  });
+
+  document.getElementById("back-btn")!.addEventListener("click", () => {
+    listScreen.style.display = "none";
+    authScreen.style.display = "block";
+    loading.style.display = "block";
+    listContent.style.display = "none";
+    errorMsg.style.display = "none";
+    tableBody.innerHTML = "";
+  });
+
+  document.getElementById("print-btn")!.addEventListener("click", () => {
+    document.getElementById("print-date")!.textContent = new Date().toLocaleString("en-GB");
+    window.print();
+  });
+
+  async function loadList(slug: string, password: string) {
+    loading.style.display = "block";
+    listContent.style.display = "none";
+    errorMsg.style.display = "none";
+
+    try {
+      const res = await fetch(`/api/door-list?slug=${encodeURIComponent(slug)}&password=${encodeURIComponent(password)}`);
+      const data = await res.json();
+
+      if (res.status === 401) {
+        authError.style.display = "block";
+        listScreen.style.display = "none";
+        authScreen.style.display = "block";
+        loading.style.display = "block";
+        return;
+      }
+
+      if (!res.ok) throw new Error(data.error);
+
+      loading.style.display = "none";
+
+      if (data.orders.length === 0) {
+        errorMsg.textContent = "No confirmed bookings yet for this event.";
+        errorMsg.style.display = "block";
+        return;
+      }
+
+      summaryText.textContent = `${data.orders.length} booking${data.orders.length === 1 ? "" : "s"} · ${data.totalTickets} ticket${data.totalTickets === 1 ? "" : "s"} total`;
+
+      tableBody.innerHTML = "";
+      data.orders.forEach((order: any) => {
+        const ticketSummary = order.tickets
+          .map((t: any) => `${t.quantity}× ${t.name}`)
+          .join(", ");
+        const total = order.tickets.reduce((sum: number, t: any) => sum + t.price * t.quantity, 0);
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="col-name">${order.buyer_name}</td>
+          <td class="col-tickets">${ticketSummary}</td>
+          <td class="col-total">£${total.toFixed(2)}</td>
+          <td class="col-check"><span class="check-box"></span></td>
+        `;
+        tableBody.appendChild(tr);
+      });
+
+      listContent.style.display = "block";
+    } catch (err) {
+      loading.style.display = "none";
+      errorMsg.textContent = "Failed to load bookings. Please try again.";
+      errorMsg.style.display = "block";
+    }
+  }
+</script>
+
+<style>
+  .page {
+    min-height: 100dvh;
+    background: #faf6f0;
+    padding: 2rem 1rem;
+  }
+
+  .screen {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-family: var(--font-heading);
+    font-size: var(--text-2xl);
+    color: var(--color-text-primary);
+    margin-bottom: 1.5rem;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+  }
+
+  .field {
+    margin-bottom: 1.25rem;
+  }
+
+  .field label {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    color: var(--color-text-primary);
+  }
+
+  .field select,
+  .field input {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+  }
+
+  .field select:focus,
+  .field input:focus {
+    outline: none;
+    border-color: var(--color-accent-gold);
+  }
+
+  .btn {
+    display: inline-block;
+    background: var(--color-accent-gold);
+    color: var(--color-text-on-accent);
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1.8rem;
+    font-size: var(--text-base);
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font-body);
+  }
+
+  .btn:hover { background: var(--color-accent-gold-hover); }
+
+  .error {
+    color: var(--color-error);
+    font-size: var(--text-sm);
+    margin-bottom: 1rem;
+  }
+
+  .loading {
+    color: var(--color-text-muted);
+    padding: 2rem 0;
+  }
+
+  /* --- List screen --- */
+  .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .back-link {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    padding: 0;
+    font-family: var(--font-body);
+  }
+
+  .back-link:hover { color: var(--color-text-primary); }
+
+  .print-header { margin-bottom: 1rem; }
+  .print-header h1 { margin-bottom: 0.25rem; }
+  .print-header p { color: var(--color-text-muted); font-size: var(--text-sm); }
+
+  .summary {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    margin-bottom: 1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+  }
+
+  th {
+    background: var(--color-accent-gold);
+    color: var(--color-text-on-accent);
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-size: var(--text-sm);
+    font-weight: 700;
+  }
+
+  td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border-light);
+    font-size: var(--text-sm);
+    color: var(--color-text-primary);
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: #faf6f0; }
+
+  .col-check { width: 48px; text-align: center; }
+  .col-total { width: 80px; }
+  .col-tickets { width: 160px; }
+
+  .check-box {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--color-border);
+    border-radius: 3px;
+  }
+
+  .print-footer {
+    display: none;
+    font-size: 11px;
+    color: #999;
+    margin-top: 1rem;
+    text-align: right;
+  }
+
+  /* --- Print styles --- */
+  @media print {
+    .no-print { display: none !important; }
+
+    .page { padding: 0; background: #fff; }
+
+    .print-header h1 { font-size: 18px; margin-bottom: 4px; }
+    .print-header p { font-size: 12px; }
+
+    table { border: 1px solid #ccc; border-radius: 0; }
+    th { background: #2d3a2d !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    tr:nth-child(even) td { background: #f5f5f5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+    .check-box {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid #666;
+    }
+
+    .print-footer { display: block; }
+    .summary { font-size: 11px; }
+  }
+</style>
