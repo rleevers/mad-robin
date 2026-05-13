@@ -49,13 +49,22 @@ export const handler = async (event) => {
     const totalAmount = (paymentIntent.amount / 100).toFixed(2);
 
     try {
-      await resend.emails.send({
-        from: process.env.FROM_EMAIL,
-        reply_to: "madrobinband@gmail.com",
-        to: order.buyer_email,
-        subject: `Your tickets — ${order.event_title}`,
-        html: buildEmail({ order, totalAmount }),
-      });
+      await Promise.all([
+        resend.emails.send({
+          from: process.env.FROM_EMAIL,
+          reply_to: "madrobinband@gmail.com",
+          to: order.buyer_email,
+          subject: `Your tickets — ${order.event_title}`,
+          html: buildEmail({ order, totalAmount }),
+        }),
+        resend.emails.send({
+          from: process.env.FROM_EMAIL,
+          reply_to: order.buyer_email,
+          to: "madrobinband@gmail.com",
+          subject: `🎟 New booking: ${order.event_title}`,
+          html: buildOrganiserEmail({ order, totalAmount }),
+        }),
+      ]);
     } catch (emailErr) {
       console.error("Email send failed:", emailErr);
     }
@@ -63,6 +72,50 @@ export const handler = async (event) => {
 
   return { statusCode: 200, body: JSON.stringify({ received: true }) };
 };
+
+function buildOrganiserEmail({ order, totalAmount }) {
+  const ticketLines = order.tickets
+    .map((t) => `${t.quantity}× ${t.name} @ £${t.price.toFixed(2)}`)
+    .join("<br>");
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;">
+  <div style="max-width:500px;margin:0 auto;padding:32px 20px;">
+    <div style="background:#fff;border-radius:8px;padding:24px;border:1px solid #ddd;">
+      <h2 style="margin:0 0 4px;color:#2d3a2d;font-size:18px;">New ticket booking</h2>
+      <p style="margin:0 0 20px;color:#5a6b5a;font-size:14px;">${order.event_title} &mdash; ${order.event_venue}</p>
+
+      <table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:14px;">
+        <tr>
+          <td style="padding:6px 0;color:#637662;width:120px;">Name</td>
+          <td style="padding:6px 0;font-weight:700;color:#2d3a2d;">${order.buyer_name}</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0;color:#637662;">Email</td>
+          <td style="padding:6px 0;color:#2d3a2d;">
+            <a href="mailto:${order.buyer_email}" style="color:#c23b22;">${order.buyer_email}</a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0;color:#637662;">Tickets</td>
+          <td style="padding:6px 0;color:#2d3a2d;">${ticketLines}</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0;color:#637662;">Total paid</td>
+          <td style="padding:6px 0;font-weight:700;color:#c23b22;">&pound;${totalAmount}</td>
+        </tr>
+      </table>
+
+      <p style="margin:0;font-size:12px;color:#8a9a88;">
+        Reply to this email to contact ${order.buyer_name} directly.
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
 
 function buildEmail({ order, totalAmount }) {
   const ticketRows = order.tickets
