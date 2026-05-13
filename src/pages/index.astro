@@ -28,6 +28,8 @@ const members = allMembers.sort((a, b) => a.data.sortOrder - b.data.sortOrder);
 
 const allGallery = await getCollection("gallery");
 const galleryItems = allGallery.sort((a, b) => a.data.sortOrder - b.data.sortOrder);
+const galleryCategories = ["All", "Weddings", "Barn Dances", "Private", "Public"];
+const GALLERY_PREVIEW = 6;
 
 const allFaq = await getCollection("faq");
 const faqItems = allFaq.sort((a, b) => a.data.sortOrder - b.data.sortOrder);
@@ -332,17 +334,27 @@ const jsonLd = JSON.stringify([
         subtitle="Photos and videos from our events"
       />
 
-      <!-- Gallery grid -->
-      <SwipeCarousel
-        id="gallery-grid"
-        label="Gallery photos and videos"
-        class="gallery-grid"
-        desktopGrid="repeat(auto-fill, minmax(250px, 1fr))"
-        cardMinWidth="85%"
-      >
+      {galleryItems.length > 0 && (
+        <div class="filter-tabs" role="tablist" aria-label="Gallery categories">
+          {galleryCategories.map((cat) => (
+            <button
+              role="tab"
+              class:list={["filter-tab", { active: cat === "All" }]}
+              data-category={cat}
+              aria-selected={cat === "All" ? "true" : "false"}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div aria-live="polite" class="sr-only" id="gallery-status"></div>
+
+      <div class="gallery-grid" id="gallery-grid">
         {
           galleryItems.length > 0
-            ? galleryItems.map((item) => (
+            ? galleryItems.map((item, idx) => (
                 <a
                   href={item.data.image || "#"}
                   class:list={[
@@ -353,6 +365,7 @@ const jsonLd = JSON.stringify([
                   data-category={item.data.category}
                   data-pswp-width={item.data.video && !item.data.image ? "1280" : ""}
                   data-pswp-height={item.data.video && !item.data.image ? "720" : ""}
+                  style={idx >= GALLERY_PREVIEW ? "display:none" : ""}
                   {...(item.data.video ? { "data-video-src": item.data.video } : {})}
                 >
                   {item.data.image ? (
@@ -387,7 +400,7 @@ const jsonLd = JSON.stringify([
                 </a>
               ))
             : Array.from({ length: 6 }).map((_, i) => (
-                <div class="gallery-placeholder-card" data-category="All">
+                <div class="gallery-placeholder-card">
                   <PlaceholderImage
                     alt={`Gallery photo coming soon ${i + 1}`}
                     aspectRatio="4 / 3"
@@ -396,10 +409,7 @@ const jsonLd = JSON.stringify([
                 </div>
               ))
         }
-      </SwipeCarousel>
-      <p class="gallery-see-all">
-        <a href="/gallery" class="gallery-see-all-link">See all photos &amp; videos &rarr;</a>
-      </p>
+      </div>
     </div>
   </section>
 
@@ -874,7 +884,9 @@ const jsonLd = JSON.stringify([
 
   /* ---- Gallery ---- */
   .gallery-grid {
+    display: grid;
     gap: var(--space-md);
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
 
   .gallery-item {
@@ -937,21 +949,6 @@ const jsonLd = JSON.stringify([
     border: 1px dashed var(--color-border);
   }
 
-  .gallery-see-all {
-    text-align: center;
-    margin-top: var(--space-xl);
-  }
-
-  .gallery-see-all-link {
-    font-size: var(--text-sm);
-    font-weight: 600;
-    color: var(--color-accent-gold);
-    text-decoration: none;
-  }
-
-  .gallery-see-all-link:hover {
-    text-decoration: underline;
-  }
 
   /* ---- Testimonials ---- */
   .testimonials-grid {
@@ -1467,5 +1464,43 @@ const jsonLd = JSON.stringify([
     } catch {
       // Silently fail — availability badge is non-critical
     }
+  });
+</script>
+
+<script>
+  // Gallery category filtering
+  const PREVIEW = 6;
+  const tabs = document.querySelectorAll<HTMLButtonElement>(".filter-tab");
+  const items = Array.from(document.querySelectorAll<HTMLElement>(".gallery-item"));
+  const status = document.getElementById("gallery-status");
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const category = tab.dataset.category;
+
+      tabs.forEach((t) => { t.classList.remove("active"); t.setAttribute("aria-selected", "false"); });
+      tab.classList.add("active");
+      tab.setAttribute("aria-selected", "true");
+
+      let visible = 0;
+      if (category === "All") {
+        items.forEach((item, idx) => {
+          item.style.display = idx < PREVIEW ? "" : "none";
+          if (idx < PREVIEW) visible++;
+        });
+      } else {
+        items.forEach((item) => {
+          const show = item.dataset.category === category;
+          item.style.display = show ? "" : "none";
+          if (show) visible++;
+        });
+      }
+
+      if (status) {
+        status.textContent = category === "All"
+          ? `Showing ${visible} photos and videos`
+          : `Showing ${visible} ${category} photo${visible !== 1 ? "s" : ""}`;
+      }
+    });
   });
 </script>
