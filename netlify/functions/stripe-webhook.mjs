@@ -11,9 +11,11 @@ export const handler = async (event) => {
 
   let stripeEvent;
   try {
-    // event.body must be the raw string — do NOT JSON.parse before this
+    const rawBody = event.isBase64Encoded
+      ? Buffer.from(event.body, "base64").toString("utf8")
+      : event.body;
     stripeEvent = stripe.webhooks.constructEvent(
-      event.body,
+      rawBody,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
