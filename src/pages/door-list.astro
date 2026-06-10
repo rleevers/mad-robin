@@ -338,7 +338,10 @@ const ticketedEvents = allEvents
   }
 </script>
 
-<style>
+{/* is:global because the table rows are built with JS at runtime — scoped
+    styles only match elements Astro renders itself. This CSS still only
+    loads on this page. */}
+<style is:global>
   .page {
     min-height: 100svh;
     background: #faf6f0;
