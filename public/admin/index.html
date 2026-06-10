@@ -12,7 +12,8 @@
       // Manual init so we can configure local_backend on localhost
       window.CMS_MANUAL_INIT = true;
     </script>
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <!-- Pinned: ^3.0.0 floats to brand-new releases; 3.13/3.14 broke entry editing via git-gateway -->
+    <script src="https://unpkg.com/decap-cms@3.12.2/dist/decap-cms.js"></script>
     <script>
       if (location.hostname === "localhost") {
         CMS.init({ config: { local_backend: true } });
