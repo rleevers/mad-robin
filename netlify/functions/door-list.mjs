@@ -16,12 +16,22 @@ export const handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: "slug is required" }) };
   }
 
-  const { data: orders, error } = await supabase
+  let { data: orders, error } = await supabase
     .from("orders")
-    .select("buyer_name, buyer_email, tickets, total_tickets, confirmed_at")
+    .select("id, buyer_name, buyer_email, tickets, total_tickets, confirmed_at, checked_in")
     .eq("event_slug", slug)
     .eq("status", "confirmed")
     .order("buyer_name", { ascending: true });
+
+  if (error) {
+    // checked_in column may not exist until the migration runs
+    ({ data: orders, error } = await supabase
+      .from("orders")
+      .select("id, buyer_name, buyer_email, tickets, total_tickets, confirmed_at")
+      .eq("event_slug", slug)
+      .eq("status", "confirmed")
+      .order("buyer_name", { ascending: true }));
+  }
 
   if (error) {
     console.error("door-list error:", error);

@@ -37,7 +37,10 @@ const ticketedEvents = allEvents
     <div id="list-screen" class="screen" style="display:none">
       <div class="list-header no-print">
         <button id="back-btn" class="back-link">← Back</button>
-        <button id="print-btn" class="btn">Print / Save as PDF</button>
+        <div class="header-actions">
+          <button id="refresh-btn" class="btn btn--outline-sm">Refresh</button>
+          <button id="print-btn" class="btn">Print / Save as PDF</button>
+        </div>
       </div>
 
       <div class="print-header">
@@ -50,7 +53,10 @@ const ticketedEvents = allEvents
 
       <div id="list-content" style="display:none">
         <div class="summary">
-          <span id="summary-text"></span>
+          <span id="summary-text"></span><span id="sync-status" class="sync-status" style="display:none"></span>
+        </div>
+        <div class="search-field no-print">
+          <input type="search" id="search-box" placeholder="Search names…" autocomplete="off" />
         </div>
         <table id="door-table">
           <thead>
@@ -63,6 +69,7 @@ const ticketedEvents = allEvents
           </thead>
           <tbody id="table-body"></tbody>
         </table>
+        <p class="tap-hint no-print">Tap a row when the party arrives. Ticks save automatically.</p>
         <p class="print-footer">Printed from madrobinband.co.uk &mdash; <span id="print-date"></span></p>
       </div>
     </div>
@@ -80,32 +87,62 @@ const ticketedEvents = allEvents
   const listContent = document.getElementById("list-content")!;
   const tableBody = document.getElementById("table-body")!;
   const summaryText = document.getElementById("summary-text")!;
+  const syncStatus = document.getElementById("sync-status")!;
+  const searchBox = document.getElementById("search-box") as HTMLInputElement;
+  const eventSelect = document.getElementById("event-select") as HTMLSelectElement;
+  const passwordInput = document.getElementById("password") as HTMLInputElement;
   const eventTitle = document.getElementById("event-title")!;
   const eventMeta = document.getElementById("event-meta")!;
 
+  // Local dev has no Netlify functions, so the page runs on sample bookings
+  // and ticks persist in localStorage only (any password works).
+  const DEV = import.meta.env.DEV;
+  const SAMPLE_ORDERS = [
+    { id: "dev-1", buyer_name: "Alice Hartley", tickets: [{ name: "Adult", quantity: 2, price: 8 }], total_tickets: 2, checked_in: 0 },
+    { id: "dev-2", buyer_name: "Bren Okafor", tickets: [{ name: "Adult", quantity: 1, price: 10 }, { name: "Child", quantity: 2, price: 5 }], total_tickets: 3, checked_in: 0 },
+    { id: "dev-3", buyer_name: "Carys Pengelly", tickets: [{ name: "Concession", quantity: 1, price: 6.5 }], total_tickets: 1, checked_in: 0 },
+    { id: "dev-4", buyer_name: "Dev Sharma", tickets: [{ name: "Adult", quantity: 4, price: 10 }], total_tickets: 4, checked_in: 0 },
+    { id: "dev-5", buyer_name: "Eleanor Voss", tickets: [{ name: "Adult", quantity: 1, price: 8 }, { name: "Concession", quantity: 1, price: 6.5 }], total_tickets: 2, checked_in: 0 },
+  ];
+
   let currentPassword = "";
   let currentSlug = "";
+  let orders: any[] = [];
 
-  authForm.addEventListener("submit", async (e) => {
+  authForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    const slug = (document.getElementById("event-select") as HTMLSelectElement).value;
-    const password = (document.getElementById("password") as HTMLInputElement).value;
-    const selectedOption = (document.getElementById("event-select") as HTMLSelectElement).selectedOptions[0];
+    if (!eventSelect.value || !passwordInput.value) return;
+    sessionStorage.setItem(
+      "doorlist-session",
+      JSON.stringify({ slug: eventSelect.value, password: passwordInput.value })
+    );
+    enterList();
+  });
 
-    if (!slug || !password) return;
+  // Survive an accidental refresh mid-event
+  try {
+    const saved = JSON.parse(sessionStorage.getItem("doorlist-session") ?? "null");
+    if (saved?.slug && saved?.password && [...eventSelect.options].some((o) => o.value === saved.slug)) {
+      eventSelect.value = saved.slug;
+      passwordInput.value = saved.password;
+      enterList();
+    }
+  } catch {}
 
-    currentPassword = password;
-    currentSlug = slug;
-
+  function enterList() {
+    currentSlug = eventSelect.value;
+    currentPassword = passwordInput.value;
+    const selectedOption = eventSelect.selectedOptions[0];
     authScreen.style.display = "none";
     listScreen.style.display = "block";
     eventTitle.textContent = selectedOption.text.split(" — ")[0];
-    eventMeta.textContent = selectedOption.text.split(" — ")[1] ?? "";
-
-    await loadList(slug, password);
-  });
+    eventMeta.textContent =
+      (selectedOption.text.split(" — ")[1] ?? "") + (DEV ? " · sample data (local dev)" : "");
+    loadList();
+  }
 
   document.getElementById("back-btn")!.addEventListener("click", () => {
+    sessionStorage.removeItem("doorlist-session");
     listScreen.style.display = "none";
     authScreen.style.display = "block";
     loading.style.display = "block";
@@ -119,24 +156,34 @@ const ticketedEvents = allEvents
     window.print();
   });
 
-  async function loadList(slug: string, password: string) {
+  document.getElementById("refresh-btn")!.addEventListener("click", () => loadList());
+  searchBox.addEventListener("input", applySearch);
+
+  async function loadList() {
     loading.style.display = "block";
     listContent.style.display = "none";
     errorMsg.style.display = "none";
 
     try {
-      const res = await fetch(`/api/door-list?slug=${encodeURIComponent(slug)}&password=${encodeURIComponent(password)}`);
-      const data = await res.json();
+      let data: any;
+      if (DEV) {
+        data = { orders: structuredClone(SAMPLE_ORDERS) };
+      } else {
+        const res = await fetch(
+          `/api/door-list?slug=${encodeURIComponent(currentSlug)}&password=${encodeURIComponent(currentPassword)}`
+        );
+        data = await res.json();
 
-      if (res.status === 401) {
-        authError.style.display = "block";
-        listScreen.style.display = "none";
-        authScreen.style.display = "block";
-        loading.style.display = "block";
-        return;
+        if (res.status === 401) {
+          authError.style.display = "block";
+          listScreen.style.display = "none";
+          authScreen.style.display = "block";
+          loading.style.display = "block";
+          return;
+        }
+
+        if (!res.ok) throw new Error(data.error);
       }
-
-      if (!res.ok) throw new Error(data.error);
 
       loading.style.display = "none";
 
@@ -146,30 +193,147 @@ const ticketedEvents = allEvents
         return;
       }
 
-      summaryText.textContent = `${data.orders.length} booking${data.orders.length === 1 ? "" : "s"} · ${data.totalTickets} ticket${data.totalTickets === 1 ? "" : "s"} total`;
+      orders = data.orders.map((o: any) => ({ ...o, checked_in: o.checked_in ?? 0 }));
 
-      tableBody.innerHTML = "";
-      data.orders.forEach((order: any) => {
-        const ticketSummary = order.tickets
-          .map((t: any) => `${t.quantity}× ${t.name}`)
-          .join(", ");
-        const total = order.tickets.reduce((sum: number, t: any) => sum + t.price * t.quantity, 0);
+      // Ticks not yet synced to the server win over what the server last saw
+      const pending = getPending();
+      for (const o of orders) {
+        if (pending[o.id] != null) o.checked_in = pending[o.id];
+      }
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td class="col-name">${order.buyer_name}</td>
-          <td class="col-tickets">${ticketSummary}</td>
-          <td class="col-total">£${total.toFixed(2)}</td>
-          <td class="col-check"><span class="check-box"></span></td>
-        `;
-        tableBody.appendChild(tr);
-      });
-
+      renderTable();
       listContent.style.display = "block";
+      flushPending();
     } catch (err) {
       loading.style.display = "none";
       errorMsg.textContent = "Failed to load bookings. Please try again.";
       errorMsg.style.display = "block";
+    }
+  }
+
+  function renderTable() {
+    tableBody.innerHTML = "";
+    for (const order of orders) {
+      const tr = document.createElement("tr");
+      tr.className = "order-row";
+      tr.dataset.name = order.buyer_name.toLowerCase();
+      tr.tabIndex = 0;
+
+      const tdName = document.createElement("td");
+      tdName.className = "col-name";
+      tdName.textContent = order.buyer_name;
+
+      const tdTickets = document.createElement("td");
+      tdTickets.className = "col-tickets";
+      tdTickets.textContent = order.tickets.map((t: any) => `${t.quantity}× ${t.name}`).join(", ");
+
+      const tdTotal = document.createElement("td");
+      tdTotal.className = "col-total";
+      const total = order.tickets.reduce((sum: number, t: any) => sum + t.price * t.quantity, 0);
+      tdTotal.textContent = `£${total.toFixed(2)}`;
+
+      const tdCheck = document.createElement("td");
+      tdCheck.className = "col-check";
+      const box = document.createElement("span");
+      box.className = "check-box";
+      tdCheck.appendChild(box);
+
+      tr.append(tdName, tdTickets, tdTotal, tdCheck);
+      tr.addEventListener("click", () => toggleOrder(order, tr));
+      tr.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggleOrder(order, tr);
+        }
+      });
+      applyRowState(order, tr);
+      tableBody.appendChild(tr);
+    }
+    applySearch();
+    updateSummary();
+    updateSyncStatus();
+  }
+
+  function applyRowState(order: any, tr: HTMLElement) {
+    tr.classList.toggle("row-checked", order.checked_in >= order.total_tickets);
+  }
+
+  function toggleOrder(order: any, tr: HTMLElement) {
+    order.checked_in = order.checked_in >= order.total_tickets ? 0 : order.total_tickets;
+    applyRowState(order, tr);
+    const pending = getPending();
+    pending[order.id] = order.checked_in;
+    setPending(pending);
+    updateSummary();
+    flushPending();
+  }
+
+  function updateSummary() {
+    const totalPeople = orders.reduce((s, o) => s + o.total_tickets, 0);
+    const arrived = orders.reduce((s, o) => s + Math.min(o.checked_in ?? 0, o.total_tickets), 0);
+    summaryText.textContent = `${arrived} of ${totalPeople} arrived · ${orders.length} booking${orders.length === 1 ? "" : "s"}`;
+  }
+
+  function applySearch() {
+    const q = searchBox.value.trim().toLowerCase();
+    tableBody.querySelectorAll("tr").forEach((tr) => {
+      tr.style.display = !q || (tr.dataset.name ?? "").includes(q) ? "" : "none";
+    });
+  }
+
+  // --- Sync ---
+  // Ticks apply instantly on screen and are pushed to the server in the
+  // background. If the hall wifi drops they queue in localStorage and retry
+  // every 20s, so nothing is lost to a dead spot or a page reload.
+  function pendingKey() {
+    return `doorlist-pending-${currentSlug}`;
+  }
+  function getPending(): Record<string, number> {
+    try {
+      return JSON.parse(localStorage.getItem(pendingKey()) ?? "{}");
+    } catch {
+      return {};
+    }
+  }
+  function setPending(p: Record<string, number>) {
+    localStorage.setItem(pendingKey(), JSON.stringify(p));
+    updateSyncStatus();
+  }
+
+  let flushing = false;
+  async function flushPending() {
+    if (DEV || flushing) return; // in dev, ticks just live in localStorage
+    const pending = getPending();
+    if (!Object.keys(pending).length) return;
+    flushing = true;
+    try {
+      for (const [id, value] of Object.entries(pending)) {
+        const res = await fetch("/api/door-checkin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ slug: currentSlug, password: currentPassword, order_id: id, checked_in: value }),
+        });
+        if (!res.ok) break; // leave in the queue; the interval will retry
+        const remaining = getPending();
+        delete remaining[id];
+        setPending(remaining);
+      }
+    } catch {
+      // offline — the interval will retry
+    } finally {
+      flushing = false;
+    }
+  }
+  setInterval(flushPending, 20000);
+  window.addEventListener("online", flushPending);
+
+  function updateSyncStatus() {
+    const n = Object.keys(getPending()).length;
+    if (DEV || n === 0) {
+      syncStatus.style.display = "none";
+    } else {
+      syncStatus.style.display = "inline";
+      syncStatus.textContent = ` · ${n} tick${n === 1 ? "" : "s"} waiting to sync`;
     }
   }
 </script>
@@ -244,6 +408,18 @@ const ticketedEvents = allEvents
 
   .btn:hover { background: var(--color-accent-gold-hover); }
 
+  .btn--outline-sm {
+    background: none;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    padding: 0.75rem 1.2rem;
+  }
+  .btn--outline-sm:hover {
+    background: none;
+    border-color: var(--color-accent-gold);
+    color: var(--color-accent-gold);
+  }
+
   .error {
     color: var(--color-error);
     font-size: var(--text-sm);
@@ -261,6 +437,12 @@ const ticketedEvents = allEvents
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.5rem;
+    gap: 1rem;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 0.6rem;
   }
 
   .back-link {
@@ -283,6 +465,26 @@ const ticketedEvents = allEvents
     font-size: var(--text-sm);
     color: var(--color-text-muted);
     margin-bottom: 1rem;
+    font-weight: 700;
+  }
+
+  .sync-status { color: #856404; }
+
+  .search-field { margin-bottom: 1rem; }
+
+  .search-field input {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    background: #fff;
+    color: var(--color-text-primary);
+  }
+
+  .search-field input:focus {
+    outline: none;
+    border-color: var(--color-accent-gold);
   }
 
   table {
@@ -304,7 +506,7 @@ const ticketedEvents = allEvents
   }
 
   td {
-    padding: 0.75rem 1rem;
+    padding: 0.9rem 1rem;
     border-bottom: 1px solid var(--color-border-light);
     font-size: var(--text-sm);
     color: var(--color-text-primary);
@@ -313,16 +515,53 @@ const ticketedEvents = allEvents
   tr:last-child td { border-bottom: none; }
   tr:nth-child(even) td { background: #faf6f0; }
 
+  .order-row {
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .row-checked td { background: #e6f4e6 !important; }
+  .row-checked .col-name,
+  .row-checked .col-tickets,
+  .row-checked .col-total { opacity: 0.55; }
+
   .col-check { width: 48px; text-align: center; }
   .col-total { width: 80px; }
   .col-tickets { width: 160px; }
 
   .check-box {
     display: inline-block;
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border: 2px solid var(--color-border);
-    border-radius: 3px;
+    border-radius: 4px;
+    position: relative;
+    vertical-align: middle;
+  }
+
+  .row-checked .check-box {
+    background: #3a6b35;
+    border-color: #3a6b35;
+  }
+
+  .row-checked .check-box::after {
+    content: "✓";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .tap-hint {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    margin-top: 0.75rem;
   }
 
   .print-footer {
@@ -331,6 +570,13 @@ const ticketedEvents = allEvents
     color: #999;
     margin-top: 1rem;
     text-align: right;
+  }
+
+  /* --- Mobile: bigger touch targets, drop the £ column --- */
+  @media (max-width: 640px) {
+    .col-total { display: none; }
+    th, td { padding: 0.9rem 0.75rem; }
+    .col-tickets { width: auto; }
   }
 
   /* --- Print styles --- */
@@ -342,9 +588,13 @@ const ticketedEvents = allEvents
     .print-header h1 { font-size: 18px; margin-bottom: 4px; }
     .print-header p { font-size: 12px; }
 
+    .col-total { display: table-cell !important; }
+
     table { border: 1px solid #ccc; border-radius: 0; }
     th { background: #2d3a2d !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     tr:nth-child(even) td { background: #f5f5f5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .row-checked td { background: #e6f4e6 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .row-checked .check-box { background: #3a6b35 !important; border-color: #3a6b35 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
     .check-box {
       width: 16px;
