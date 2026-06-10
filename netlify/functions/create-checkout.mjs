@@ -26,59 +26,23 @@ export const handler = async (event) => {
   }
 
   const totalTickets = tickets.reduce((sum, t) => sum + t.quantity, 0);
+  const totalAmount = tickets.reduce((sum, t) => sum + t.price * t.quantity, 0);
 
-  if (
-    totalTickets < 1 ||
-    totalTickets > 8 ||
-    tickets.some((t) => !Number.isInteger(t.quantity) || t.quantity < 1)
-  ) {
+  if (totalTickets < 1 || totalTickets > 8) {
     return { statusCode: 400, body: JSON.stringify({ error: "Quantity must be between 1 and 8" }) };
   }
 
   try {
-    // Check availability (pricing columns may not exist until the migration runs)
-    let { data: inventory, error: invErr } = await supabase
+    // Check availability
+    const { data: inventory, error: invErr } = await supabase
       .from("event_inventory")
-      .select("capacity, tiers, early_bird_until")
+      .select("capacity")
       .eq("event_slug", event_slug)
       .single();
-
-    if (invErr) {
-      ({ data: inventory, error: invErr } = await supabase
-        .from("event_inventory")
-        .select("capacity")
-        .eq("event_slug", event_slug)
-        .single());
-    }
 
     if (invErr || !inventory) {
       return { statusCode: 404, body: JSON.stringify({ error: "Event not found" }) };
     }
-
-    // Price tickets from the synced tier list, never from the client. Early bird
-    // applies through the end of the deadline day (date-only, parsed as UTC
-    // midnight, hence +24h) plus an hour's grace for buyers who loaded the page
-    // just before it passed.
-    const trustedTiers =
-      Array.isArray(inventory.tiers) && inventory.tiers.length ? inventory.tiers : null;
-    let pricedTickets = tickets;
-    if (trustedTiers) {
-      const ebEnds = inventory.early_bird_until
-        ? Date.parse(inventory.early_bird_until) + 25 * 60 * 60 * 1000
-        : 0;
-      const earlyBird = Date.now() < ebEnds;
-      pricedTickets = [];
-      for (const t of tickets) {
-        const tier = trustedTiers.find((x) => x.name === t.name);
-        if (!tier) {
-          return { statusCode: 400, body: JSON.stringify({ error: `Unknown ticket type: ${t.name}` }) };
-        }
-        const price = earlyBird && tier.earlyBirdPrice != null ? tier.earlyBirdPrice : tier.price;
-        pricedTickets.push({ name: tier.name, quantity: t.quantity, price });
-      }
-    }
-
-    const totalAmount = pricedTickets.reduce((sum, t) => sum + t.price * t.quantity, 0);
 
     const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
     const [{ data: confirmed }, { data: pending }] = await Promise.all([
@@ -112,7 +76,7 @@ export const handler = async (event) => {
       stripe_payment_intent_id: paymentIntent.id,
       buyer_name,
       buyer_email,
-      tickets: pricedTickets,
+      tickets,
       total_tickets: totalTickets,
       status: "pending",
     });

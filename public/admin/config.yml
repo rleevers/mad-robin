@@ -24,7 +24,6 @@ collections:
       - { label: "Description", name: "description", widget: "text" }
       - { label: "Sell tickets on website", name: "ticketingEnabled", widget: "boolean", default: false, hint: "Turn on to show the Buy Tickets widget on the event page" }
       - { label: "Ticket capacity", name: "capacity", widget: "number", required: false, value_type: "int", hint: "Total number of tickets available" }
-      - { label: "Early bird ends", name: "earlyBirdUntil", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, required: false, hint: "Last day of early bird prices — they revert to full price at the end of this day. Leave empty for no early bird." }
       - label: "Ticket tiers"
         name: "tiers"
         widget: "list"
@@ -33,7 +32,6 @@ collections:
         fields:
           - { label: "Name", name: "name", widget: "string", hint: "e.g. Adult, Concession, Child" }
           - { label: "Price (£)", name: "price", widget: "number", value_type: "float", step: 0.5 }
-          - { label: "Early bird price (£)", name: "earlyBirdPrice", widget: "number", value_type: "float", step: 0.5, required: false, hint: "Discounted price until the early bird deadline. Leave empty for no early bird on this tier." }
 
   # ============ Testimonials ============
   - name: "testimonials"

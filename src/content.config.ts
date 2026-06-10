@@ -12,16 +12,7 @@ const events = defineCollection({
     startTime: z.string().optional(),
     ticketingEnabled: z.boolean().optional(),
     capacity: z.number().int().positive().optional(),
-    earlyBirdUntil: z.coerce.date().optional().catch(undefined),
-    tiers: z
-      .array(
-        z.object({
-          name: z.string(),
-          price: z.number(),
-          earlyBirdPrice: z.number().optional().catch(undefined),
-        })
-      )
-      .optional(),
+    tiers: z.array(z.object({ name: z.string(), price: z.number() })).optional(),
   }),
 });
 
