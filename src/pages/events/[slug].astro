@@ -17,6 +17,18 @@ const hasTicketing = data.ticketingEnabled && data.tiers && data.tiers.length > 
 const isPast = data.date < new Date();
 const stripeKey = import.meta.env.STRIPE_PUBLISHABLE_KEY ?? "";
 
+// The page is statically built, so whether early bird is live is decided
+// client-side (and re-checked server-side at checkout) — here we only render
+// the extra markup, hidden by default.
+const hasEarlyBird =
+  hasTicketing &&
+  data.earlyBirdUntil != null &&
+  (data.tiers ?? []).some((t) => t.earlyBirdPrice != null);
+const earlyBirdUntilIso = hasEarlyBird ? data.earlyBirdUntil!.toISOString() : null;
+const formattedEarlyBirdUntil = hasEarlyBird
+  ? data.earlyBirdUntil!.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })
+  : "";
+
 const formattedDate = data.date.toLocaleDateString("en-GB", {
   weekday: "long",
   year: "numeric",
@@ -62,7 +74,13 @@ const formattedDate = data.date.toLocaleDateString("en-GB", {
         <p class="event-price-line">
           {data.tiers.map((t, i) => (
             <span>
-              {t.name}: <strong>&pound;{t.price.toFixed(2)}</strong>
+              {t.name}:{" "}
+              {t.earlyBirdPrice != null && (
+                <strong class="eb-only eb-price">&pound;{t.earlyBirdPrice.toFixed(2)}</strong>
+              )}{" "}
+              <strong class:list={["std-price", { "std-price--has-eb": t.earlyBirdPrice != null }]}>
+                &pound;{t.price.toFixed(2)}
+              </strong>
               {i < (data.tiers?.length ?? 0) - 1 ? " · " : ""}
             </span>
           ))}
@@ -109,10 +127,25 @@ const formattedDate = data.date.toLocaleDateString("en-GB", {
 
               <div class="tiers-section">
                 {data.tiers!.map((tier) => (
-                  <div class="tier-row" data-price={tier.price} data-name={tier.name}>
+                  <div
+                    class="tier-row"
+                    data-price={tier.price}
+                    data-eb-price={tier.earlyBirdPrice ?? undefined}
+                    data-name={tier.name}
+                  >
                     <div class="tier-info">
                       <span class="tier-name">{tier.name}</span>
-                      <span class="tier-price">&pound;{tier.price.toFixed(2)}</span>
+                      <span class="tier-price">
+                        {tier.earlyBirdPrice != null && (
+                          <span class="eb-only eb-tier-price">
+                            <img class="eb-icon" src="/images/early-bird.svg" alt="" aria-hidden="true" />
+                            &pound;{tier.earlyBirdPrice.toFixed(2)}
+                          </span>
+                        )}
+                        <span class:list={["std-price", { "std-price--has-eb": tier.earlyBirdPrice != null }]}>
+                          &pound;{tier.price.toFixed(2)}
+                        </span>
+                      </span>
                     </div>
                     <div class="tier-qty">
                       <button type="button" class="qty-btn qty-minus" aria-label={`Remove ${tier.name}`}>−</button>
@@ -122,6 +155,13 @@ const formattedDate = data.date.toLocaleDateString("en-GB", {
                   </div>
                 ))}
               </div>
+
+              {hasEarlyBird && (
+                <p class="eb-only eb-note">
+                  <img class="eb-icon" src="/images/early-bird.svg" alt="" aria-hidden="true" />
+                  <span>Early bird prices &mdash; available until {formattedEarlyBirdUntil}</span>
+                </p>
+              )}
 
               <div id="total-row" class="total-row" style="display:none">
                 <span>Total</span>
@@ -181,6 +221,7 @@ const formattedDate = data.date.toLocaleDateString("en-GB", {
     tiers: data.tiers,
     eventTitle: data.title,
     eventVenue: data.venue,
+    earlyBirdUntil: earlyBirdUntilIso,
   }}>
     let stripeInst = null;
     let elementsInst = null;
@@ -189,12 +230,28 @@ const formattedDate = data.date.toLocaleDateString("en-GB", {
     let buyerEmail = "";
 
     document.addEventListener("DOMContentLoaded", () => {
+      applyEarlyBird();
       checkAvailability();
       setupQuantityButtons();
       setupForm();
       setupPayButton();
       setupBackButton();
     });
+
+    function applyEarlyBird() {
+      if (!earlyBirdUntil) return;
+      // earlyBirdUntil is a date-only value (midnight UTC) and is inclusive,
+      // so prices run through the end of that day. The server applies the
+      // same rule at checkout — this only controls what's displayed.
+      const ends = new Date(earlyBirdUntil).getTime() + 24 * 60 * 60 * 1000;
+      if (Date.now() >= ends) return;
+      document.querySelectorAll(".tier-row").forEach((row) => {
+        if (row.dataset.ebPrice) row.dataset.price = row.dataset.ebPrice;
+      });
+      document.querySelectorAll(".event-hero, .booking-section").forEach((el) => {
+        el.classList.add("eb-active");
+      });
+    }
 
     async function checkAvailability() {
       const badge = document.getElementById("availability-badge");
@@ -606,6 +663,45 @@ const formattedDate = data.date.toLocaleDateString("en-GB", {
     display: flex;
     align-items: center;
     gap: var(--space-sm);
+  }
+
+  /* --- Early bird (revealed by applyEarlyBird() while the deadline is live) --- */
+  .eb-only { display: none; }
+
+  .eb-active .eb-price {
+    display: inline;
+    color: var(--color-accent-gold);
+  }
+
+  .eb-active .eb-tier-price {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-weight: 700;
+    color: var(--color-accent-gold);
+  }
+
+  .eb-active .std-price--has-eb {
+    text-decoration: line-through;
+    font-weight: 400;
+    opacity: 0.6;
+  }
+
+  .eb-icon {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    vertical-align: text-bottom;
+  }
+
+  .eb-active .eb-note {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--color-accent-gold);
+    margin: calc(-1 * var(--space-md)) 0 var(--space-lg);
   }
 
   .qty-btn {

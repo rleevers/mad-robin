@@ -15,7 +15,8 @@
     "astro": "^5.7.0",
     "photoswipe": "^5.4.4",
     "resend": "^6.12.3",
-    "stripe": "^22.1.1"
+    "stripe": "^22.1.1",
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@rollup/plugin-yaml": "^4.1.2"
