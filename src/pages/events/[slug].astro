@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import PageLayout from "@/layouts/PageLayout.astro";
+import { isEventPast } from "@/lib/events";
 
 export async function getStaticPaths() {
   const events = await getCollection("events");
@@ -14,7 +15,9 @@ const { event } = Astro.props;
 const { data } = event;
 
 const hasTicketing = data.ticketingEnabled && data.tiers && data.tiers.length > 0 && data.capacity;
-const isPast = data.date < new Date();
+// Past events are archived: kept reachable by direct link, but hidden from
+// search engines (noindex) and dropped from the sitemap (see astro.config.mjs).
+const isPast = isEventPast(data.date);
 const stripeKey = import.meta.env.STRIPE_PUBLISHABLE_KEY ?? "";
 
 // The page is statically built, so whether early bird is live is decided
@@ -40,6 +43,7 @@ const formattedDate = data.date.toLocaleDateString("en-GB", {
 <PageLayout
   title={`${data.title} — Mad Robin`}
   description={data.description}
+  noindex={isPast}
 >
   <section class="event-hero">
     <div class="container container--narrow">

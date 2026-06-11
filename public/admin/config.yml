@@ -17,6 +17,12 @@ collections:
     folder: "src/content/events"
     create: true
     slug: "{{slug}}"
+    # Newest first so past events sink to the bottom of the list
+    sortable_fields:
+      fields: [date, title]
+      default:
+        field: date
+        direction: Descending
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false }
