@@ -43,6 +43,23 @@ function formatTime12h(time: string): string {
   return m === 0 ? `${hour}${period}` : `${hour}:${String(m).padStart(2, "0")}${period}`;
 }
 
+// Early bird: the page is statically built, so whether the deadline is live
+// is decided client-side via data-eb-until; here we only render the markup.
+type EventEntry = (typeof upcomingEvents)[number];
+function ebUntilIso(e: EventEntry): string | undefined {
+  const hasEb =
+    e.data.earlyBirdUntil != null &&
+    (e.data.tiers ?? []).some((t) => t.earlyBirdPrice != null);
+  return hasEb ? e.data.earlyBirdUntil!.toISOString() : undefined;
+}
+function ebUntilLabel(e: EventEntry): string {
+  return e.data.earlyBirdUntil!.toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "long",
+  });
+}
+
 // Extract YouTube video ID from various URL formats
 function getYouTubeId(url: string): string | null {
   if (!url) return null;
@@ -615,16 +632,29 @@ const jsonLd = JSON.stringify([
                   )}
                   <p class="event-desc">{e.data.description}</p>
                   {e.data.ticketingEnabled && e.data.tiers && e.data.tiers.length > 0 ? (
-                    <div class="event-ticket-row">
+                    <div class="event-ticket-row" data-eb-until={ebUntilIso(e)}>
                       <span class="event-price">
-                        {e.data.tiers.map((t: {name: string, price: number}, i: number) => (
-                          <span class="tier-pair">{t.name}: £{t.price.toFixed(2)}{i < (e.data.tiers?.length ?? 0) - 1 ? " · " : ""}</span>
+                        {e.data.tiers.map((t: {name: string, price: number, earlyBirdPrice?: number | null}, i: number) => (
+                          <span class="tier-pair">
+                            {t.name}:{" "}
+                            {t.earlyBirdPrice != null && (
+                              <span class="eb-only eb-price">£{t.earlyBirdPrice.toFixed(2)}{" "}</span>
+                            )}
+                            <span class:list={{ "std-price--has-eb": t.earlyBirdPrice != null }}>£{t.price.toFixed(2)}</span>
+                            {i < (e.data.tiers?.length ?? 0) - 1 ? " · " : ""}
+                          </span>
                         ))}
                       </span>
                       <span class="event-availability" data-slug={e.id} aria-live="polite"></span>
                       <a href={`/events/${e.id}`} class="event-ticket-link">
                         Get Tickets &rarr;
                       </a>
+                      {ebUntilIso(e) && (
+                        <a href={`/events/${e.id}`} class="eb-only eb-card-cta">
+                          <img class="eb-icon" src="/images/early-bird.svg" alt="" aria-hidden="true" />
+                          <span>Early bird prices until {ebUntilLabel(e)} &mdash; <strong>book now and save</strong></span>
+                        </a>
+                      )}
                     </div>
                   ) : null}
                   <CalendarButtons
@@ -1354,6 +1384,42 @@ const jsonLd = JSON.stringify([
     font-weight: 700;
   }
 
+  /* --- Early bird (revealed by JS while the deadline is live) --- */
+  .eb-only { display: none; }
+
+  .eb-active .eb-price { display: inline; }
+
+  .eb-active .std-price--has-eb {
+    text-decoration: line-through;
+    font-weight: 400;
+    opacity: 0.65;
+  }
+
+  .eb-active .eb-card-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-basis: 100%;
+    padding: 0.45rem 0.8rem;
+    background: #fdf2ef;
+    border: 1px solid var(--color-accent-gold);
+    border-radius: var(--radius-md);
+    color: var(--color-accent-gold);
+    font-size: var(--text-sm);
+    text-decoration: none;
+  }
+
+  .eb-active .eb-card-cta:hover {
+    background: #fbe7e1;
+    text-decoration: none;
+  }
+
+  .eb-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
   .event-availability {
     display: inline-block;
     font-size: var(--text-xs);
@@ -1548,6 +1614,14 @@ const jsonLd = JSON.stringify([
 </script>
 
 <script>
+  // Reveal early-bird pricing on event cards while the deadline is live.
+  // The deadline is date-only (midnight UTC) and inclusive, hence +24h —
+  // same rule as the event page and the checkout function.
+  document.querySelectorAll<HTMLElement>("[data-eb-until]").forEach((row) => {
+    const ends = new Date(row.dataset.ebUntil!).getTime() + 24 * 60 * 60 * 1000;
+    if (Date.now() < ends) row.classList.add("eb-active");
+  });
+
   // Load live availability badges on event cards
   document.querySelectorAll<HTMLElement>(".event-availability").forEach(async (el) => {
     const slug = el.dataset.slug;
