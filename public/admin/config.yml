@@ -5,8 +5,10 @@ backend:
 media_folder: "public/images"
 public_folder: "/images"
 
-# Publish mode - editorial workflow allows draft/review/publish
-publish_mode: editorial_workflow
+# Direct publish: saving an entry commits straight to the main branch.
+# (Editorial workflow / draft PRs needs the Git Gateway GitHub token to have
+# Pull Request permission, which it has lost — and a sole editor doesn't need
+# a review step. Re-add `publish_mode: editorial_workflow` if that's restored.)
 
 collections:
   # ============ Events ============
