@@ -32,6 +32,22 @@ const formattedEarlyBirdUntil = hasEarlyBird
   ? data.earlyBirdUntil!.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })
   : "";
 
+// Door premium: advance (website) price is the headline; a higher door price
+// is shown to reward booking ahead. Display only — the door price is never
+// charged online (door sales happen in person on the night).
+const doorTiers = (data.tiers ?? []).filter((t) => t.doorPrice != null);
+const hasDoorPrice = !!hasTicketing && doorTiers.length > 0;
+const doorSavings = doorTiers.map((t) => t.doorPrice! - t.price);
+const maxSaving = doorSavings.length ? Math.max(...doorSavings) : 0;
+const uniformSaving = doorSavings.every((s) => s === doorSavings[0]);
+const moneyShort = (n: number) => `£${n.toFixed(2).replace(/\.00$/, "")}`;
+const doorSaveLabel =
+  maxSaving <= 0
+    ? "pay less than on the door"
+    : uniformSaving
+      ? `save ${moneyShort(maxSaving)}`
+      : `save up to ${moneyShort(maxSaving)}`;
+
 const formattedDate = data.date.toLocaleDateString("en-GB", {
   weekday: "long",
   year: "numeric",
@@ -85,16 +101,29 @@ const formattedDate = data.date.toLocaleDateString("en-GB", {
               <strong class:list={["std-price", { "std-price--has-eb": t.earlyBirdPrice != null }]}>
                 &pound;{t.price.toFixed(2)}
               </strong>
+              {t.doorPrice != null && (
+                <span class="door-price"> (&pound;{t.doorPrice.toFixed(2)} on the door)</span>
+              )}
               {i < (data.tiers?.length ?? 0) - 1 ? " · " : ""}
             </span>
           ))}
         </p>
       )}
 
+      {data.pricingNote && <p class="pricing-note">{data.pricingNote}</p>}
+
       {hasEarlyBird && (
         <a href="#book-tickets" class="eb-only eb-banner">
           <img class="eb-icon" src="/images/early-bird.svg" alt="" aria-hidden="true" />
           <span><strong>Early bird prices until {formattedEarlyBirdUntil}</strong> &mdash; book now and save</span>
+          <span class="eb-banner-arrow" aria-hidden="true">&darr;</span>
+        </a>
+      )}
+
+      {hasDoorPrice && !hasEarlyBird && (
+        <a href="#book-tickets" class="door-banner">
+          <img class="eb-icon" src="/images/early-bird.svg" alt="" aria-hidden="true" />
+          <span><strong>Book ahead and {doorSaveLabel}</strong> &mdash; tickets cost more on the door</span>
           <span class="eb-banner-arrow" aria-hidden="true">&darr;</span>
         </a>
       )}
@@ -157,6 +186,9 @@ const formattedDate = data.date.toLocaleDateString("en-GB", {
                         <span class:list={["std-price", { "std-price--has-eb": tier.earlyBirdPrice != null }]}>
                           &pound;{tier.price.toFixed(2)}
                         </span>
+                        {tier.doorPrice != null && (
+                          <span class="tier-door-price">&pound;{tier.doorPrice.toFixed(2)} on the door</span>
+                        )}
                       </span>
                     </div>
                     <div class="tier-qty">
@@ -700,6 +732,39 @@ const formattedDate = data.date.toLocaleDateString("en-GB", {
     margin-left: auto;
     font-weight: 700;
     font-size: var(--text-base);
+  }
+
+  /* --- Door premium (always shown; advance is the headline price) --- */
+  .door-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background: #fdf2ef;
+    border: 1px solid var(--color-accent-gold);
+    border-radius: var(--radius-md);
+    color: var(--color-accent-gold);
+    font-size: var(--text-sm);
+    text-decoration: none;
+  }
+  .door-banner:hover { background: #fbe7e1; }
+
+  .door-price {
+    color: var(--color-text-muted);
+    font-weight: 400;
+  }
+
+  .tier-door-price {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+  }
+
+  .pricing-note {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    margin-top: var(--space-xs);
   }
 
   .eb-active .eb-price {

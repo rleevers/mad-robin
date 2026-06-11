@@ -635,13 +635,16 @@ const jsonLd = JSON.stringify([
                   {e.data.ticketingEnabled && e.data.tiers && e.data.tiers.length > 0 ? (
                     <div class="event-ticket-row" data-eb-until={ebUntilIso(e)}>
                       <span class="event-price">
-                        {e.data.tiers.map((t: {name: string, price: number, earlyBirdPrice?: number | null}, i: number) => (
+                        {e.data.tiers.map((t: {name: string, price: number, earlyBirdPrice?: number | null, doorPrice?: number | null}, i: number) => (
                           <span class="tier-pair">
                             {t.name}:{" "}
                             {t.earlyBirdPrice != null && (
                               <span class="eb-only eb-price">£{t.earlyBirdPrice.toFixed(2)}{" "}</span>
                             )}
                             <span class:list={{ "std-price--has-eb": t.earlyBirdPrice != null }}>£{t.price.toFixed(2)}</span>
+                            {t.doorPrice != null && (
+                              <span class="door-price"> (£{t.doorPrice.toFixed(2)} door)</span>
+                            )}
                             {i < (e.data.tiers?.length ?? 0) - 1 ? " · " : ""}
                           </span>
                         ))}
@@ -654,6 +657,12 @@ const jsonLd = JSON.stringify([
                         <a href={`/events/${e.id}`} class="eb-only eb-card-cta">
                           <img class="eb-icon" src="/images/early-bird.svg" alt="" aria-hidden="true" />
                           <span>Early bird prices until {ebUntilLabel(e)} &mdash; <strong>book now and save</strong></span>
+                        </a>
+                      )}
+                      {!ebUntilIso(e) && e.data.tiers.some((t: {doorPrice?: number | null}) => t.doorPrice != null) && (
+                        <a href={`/events/${e.id}`} class="door-card-cta">
+                          <img class="eb-icon" src="/images/early-bird.svg" alt="" aria-hidden="true" />
+                          <span><strong>Cheaper in advance</strong> &mdash; tickets cost more on the door</span>
                         </a>
                       )}
                     </div>
@@ -1419,6 +1428,30 @@ const jsonLd = JSON.stringify([
     width: 18px;
     height: 18px;
     flex-shrink: 0;
+  }
+
+  /* --- Door premium (always shown when a door price is set) --- */
+  .door-price {
+    color: var(--color-text-secondary);
+    font-weight: 400;
+  }
+
+  .door-card-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-basis: 100%;
+    padding: 0.45rem 0.8rem;
+    background: #fdf2ef;
+    border: 1px solid var(--color-accent-gold);
+    border-radius: var(--radius-md);
+    color: var(--color-accent-gold);
+    font-size: var(--text-sm);
+    text-decoration: none;
+  }
+  .door-card-cta:hover {
+    background: #fbe7e1;
+    text-decoration: none;
   }
 
   .event-availability {

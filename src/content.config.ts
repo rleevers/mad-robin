@@ -12,12 +12,17 @@ const events = defineCollection({
     startTime: z.string().optional(),
     ticketingEnabled: z.boolean().optional(),
     capacity: z.number().int().positive().optional(),
+    pricingNote: z.string().optional(),
     earlyBirdUntil: z.coerce.date().optional().catch(undefined),
     tiers: z
       .array(
         z.object({
           name: z.string(),
           price: z.number(),
+          // Shown on the site to reward booking ahead; not transacted online
+          // (door sales happen in person). Advance `price` is what's charged.
+          doorPrice: z.number().optional().catch(undefined),
+          // Dormant timed-discount option (see config.yml hint).
           earlyBirdPrice: z.number().optional().catch(undefined),
         })
       )

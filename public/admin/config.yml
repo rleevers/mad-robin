@@ -33,16 +33,18 @@ collections:
       - { label: "Description", name: "description", widget: "text" }
       - { label: "Sell tickets on website", name: "ticketingEnabled", widget: "boolean", default: false, hint: "Turn on to show the Buy Tickets widget on the event page" }
       - { label: "Ticket capacity", name: "capacity", widget: "number", required: false, value_type: "int", hint: "Total number of tickets available" }
-      - { label: "Early bird ends", name: "earlyBirdUntil", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, required: false, hint: "Last day of early bird prices — they revert to full price at the end of this day. Leave empty for no early bird." }
+      - { label: "Pricing note", name: "pricingNote", widget: "string", required: false, hint: "Optional line shown under the prices, e.g. 'Under 5s free — just come along.'" }
+      - { label: "Early bird ends", name: "earlyBirdUntil", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, required: false, hint: "Optional. Only needed if you run a time-limited early-bird discount on the advance price. Leave empty for normal advance/door pricing." }
       - label: "Ticket tiers"
         name: "tiers"
         widget: "list"
         required: false
-        hint: "Add one row per ticket type, e.g. Adult £10, Concession £8"
+        hint: "Add one row per ticket type, e.g. Adult £10 advance / £12 door"
         fields:
           - { label: "Name", name: "name", widget: "string", hint: "e.g. Adult, Concession, Child" }
-          - { label: "Price (£)", name: "price", widget: "number", value_type: "float", step: 0.5 }
-          - { label: "Early bird price (£)", name: "earlyBirdPrice", widget: "number", value_type: "float", step: 0.5, required: false, hint: "Discounted price until the early bird deadline. Leave empty for no early bird on this tier." }
+          - { label: "Advance price (£)", name: "price", widget: "number", value_type: "float", step: 0.5, hint: "Price when booking online in advance — this is what the website charges." }
+          - { label: "Door price (£)", name: "doorPrice", widget: "number", value_type: "float", step: 0.5, required: false, hint: "Price on the door (usually £2 more). Shown on the site to encourage booking ahead. Tickets are still sold online at the advance price; you charge the door price in person." }
+          - { label: "Early bird price (£)", name: "earlyBirdPrice", widget: "number", value_type: "float", step: 0.5, required: false, hint: "Optional timed discount. Only used if 'Early bird ends' is set — leave empty for normal advance/door pricing." }
 
   # ============ Testimonials ============
   - name: "testimonials"
