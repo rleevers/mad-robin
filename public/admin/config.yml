@@ -17,12 +17,9 @@ collections:
     folder: "src/content/events"
     create: true
     slug: "{{slug}}"
-    # Newest first so past events sink to the bottom of the list
-    sortable_fields:
-      fields: [date, title]
-      default:
-        field: date
-        direction: Descending
+    # Sort the Events list by date (click the Date column → newest first,
+    # so past events sink to the bottom). Array form required by Decap 3.12.x.
+    sortable_fields: ["date", "title"]
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false }
