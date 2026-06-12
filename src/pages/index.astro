@@ -10,6 +10,7 @@ import heroLogo from "@/assets/images/logo.png";
 import heroBand from "@/assets/images/hero-band.jpg";
 import { getCollection, render } from "astro:content";
 import siteSettings from "@/data/settings/site.yml";
+import { isEventPast } from "@/lib/events";
 
 // Fetch content
 const allTestimonials = await getCollection("testimonials");
@@ -19,7 +20,7 @@ const featuredTestimonials = allTestimonials
 
 const allEvents = await getCollection("events");
 const upcomingEvents = allEvents
-  .filter((e) => e.data.date >= new Date())
+  .filter((e) => !isEventPast(e.data.date))
   .sort((a, b) => a.data.date.getTime() - b.data.date.getTime())
   .slice(0, 3);
 
