@@ -637,6 +637,7 @@ const jsonLd = JSON.stringify([
                     description={e.data.description}
                     ticketPrice={e.data.tiers ? e.data.tiers.map((t: {name: string, price: number}) => `${t.name}: £${t.price.toFixed(2)}`).join(", ") : undefined}
                     ticketLink={e.data.ticketingEnabled && e.data.capacity ? `https://madrobinband.co.uk/events/${e.id}` : undefined}
+                    sheetMusicPdf={e.data.sheetMusicPdf}
                   />
                 </div>
               </div>

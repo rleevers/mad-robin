@@ -1,4 +1,6 @@
 ---
+import SheetMusicLink from "./SheetMusicLink.astro";
+
 interface Props {
   id: string;
   title: string;
@@ -9,6 +11,7 @@ interface Props {
   description: string;
   ticketPrice?: string;
   ticketLink?: string;
+  sheetMusicPdf?: string;
 }
 
 const {
@@ -21,6 +24,7 @@ const {
   description,
   ticketPrice,
   ticketLink,
+  sheetMusicPdf,
 } = Astro.props;
 
 const [startH, startM] = startTime.split(":").map(Number);
@@ -84,6 +88,7 @@ gcUrl.searchParams.set("location", gcLocation);
     </svg>
     iCal
   </a>
+  {sheetMusicPdf && <SheetMusicLink href={sheetMusicPdf} />}
 </div>
 
 <style>

@@ -10,6 +10,7 @@ const events = defineCollection({
     mapLink: z.string().url().optional(),
     description: z.string(),
     startTime: z.string().optional(),
+    sheetMusicPdf: z.string().optional(),
     ticketingEnabled: z.boolean().optional(),
     capacity: z.number().int().positive().optional(),
     tiers: z.array(z.object({ name: z.string(), price: z.number() })).optional(),

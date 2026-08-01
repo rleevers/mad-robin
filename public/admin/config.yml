@@ -29,6 +29,7 @@ collections:
       - { label: "Venue", name: "venue", widget: "string" }
       - { label: "Map Link", name: "mapLink", widget: "string", required: false, hint: "Google Maps share link for the venue" }
       - { label: "Description", name: "description", widget: "text" }
+      - { label: "Sheet Music PDF", name: "sheetMusicPdf", widget: "file", required: false, hint: "Upload a PDF, or leave blank until you have one. A 'Sheet Music' button appears on the event page once this is set — update it anytime, even from your phone at the event.", media_library: { config: { accept: ".pdf" } } }
       - { label: "Sell tickets on website", name: "ticketingEnabled", widget: "boolean", default: false, hint: "Turn on to show the Buy Tickets widget on the event page" }
       - { label: "Ticket capacity", name: "capacity", widget: "number", required: false, value_type: "int", hint: "Total number of tickets available" }
       - label: "Ticket tiers"

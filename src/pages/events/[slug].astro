@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import PageLayout from "@/layouts/PageLayout.astro";
 import { isEventPast } from "@/lib/events";
+import SheetMusicLink from "@/components/ui/SheetMusicLink.astro";
 
 export async function getStaticPaths() {
   const events = await getCollection("events");
@@ -61,6 +62,12 @@ const formattedDate = data.date.toLocaleDateString("en-GB", {
       </div>
 
       <p class="event-description">{data.description}</p>
+
+      {data.sheetMusicPdf && (
+        <div class="event-sheet-music">
+          <SheetMusicLink href={data.sheetMusicPdf} />
+        </div>
+      )}
 
       {hasTicketing && data.tiers && (
         <p class="event-price-line">
@@ -484,6 +491,10 @@ const formattedDate = data.date.toLocaleDateString("en-GB", {
   .event-price-line {
     font-size: var(--text-sm);
     color: var(--color-text-muted);
+  }
+
+  .event-sheet-music {
+    margin-bottom: var(--space-md);
   }
 
   /* --- Booking section --- */
