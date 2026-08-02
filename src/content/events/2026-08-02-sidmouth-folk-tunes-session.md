@@ -5,5 +5,6 @@ startTime: 13:30
 venue: Rugby Club 1st Floor
 mapLink: https://maps.app.goo.gl/A7JKMbUPLtxEmqm49
 description: Tunes Session with ExeterUni FolkSoc. All welcome! Sheet music available.
+sheetMusicPdf: /images/exeunifolktunesession.pdf
 ticketingEnabled: false
 ---
