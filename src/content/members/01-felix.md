@@ -2,7 +2,7 @@
 name: Felix Weedon
 instrument: Caller, Bodhrán & Concertina
 role: Caller & MC
-photo: /images/whatsapp-image-2026-04-03-at-15.44.10.jpeg
+photo: /images/whatsapp-image-2026-04-03-at-15.44.10-thumb.webp
 sortOrder: 1
 isCaller: true
 ---
