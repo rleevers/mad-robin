@@ -2,7 +2,7 @@
 name: Matthew Aaronson
 instrument: Guitar
 role: Rhythm & accompaniment
-photo: /images/4whatsapp-image-2026-04-04-at-13.20.25.jpeg
+photo: /images/matt-pic-thumb.webp
 sortOrder: 4
 isCaller: false
 ---
