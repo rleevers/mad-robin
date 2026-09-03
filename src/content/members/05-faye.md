@@ -2,7 +2,7 @@
 name: Faye Rosewood
 instrument: Cello
 role: Bass & harmony
-photo: /images/whatsapp-image-2026-03-26-at-20.56.28.jpeg
+photo: /images/whatsapp-image-2026-03-26-at-20.56.28-thumb.webp
 sortOrder: 5
 isCaller: false
 ---
