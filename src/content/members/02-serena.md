@@ -2,7 +2,7 @@
 name: Serena Rosewood
 instrument: Recorder
 role: Lead melody
-photo: /images/serena.jpeg
+photo: /images/serena-thumb.webp
 sortOrder: 2
 isCaller: false
 ---
