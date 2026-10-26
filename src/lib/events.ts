@@ -45,7 +45,7 @@ export function eventJsonLd(slug: string, data: EventData, site: URL) {
   const pageUrl = new URL(`/events/${slug}/`, site).href;
   const band = {
     "@type": "MusicGroup",
-    name: "Mad Robin Ceilidh Band",
+    name: "Mad Robin Band",
     url: site.href,
   };
   // Without a street address, fall back to the venue name, taking the town

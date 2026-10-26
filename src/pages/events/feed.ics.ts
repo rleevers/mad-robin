@@ -67,8 +67,8 @@ export const GET: APIRoute = async () => {
     "PRODID:-//Mad Robin Ceilidh Band//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
-    "X-WR-CALNAME:Mad Robin Ceilidh Band",
-    "X-WR-CALDESC:Upcoming gigs and events from Mad Robin Ceilidh Band",
+    "X-WR-CALNAME:Mad Robin Band",
+    "X-WR-CALDESC:Upcoming gigs and events from Mad Robin Band",
     ...vevents,
     "END:VCALENDAR",
   ];
