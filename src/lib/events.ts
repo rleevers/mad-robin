@@ -42,7 +42,7 @@ export function eventEndTime(startTime: string, endTime?: string): string {
 export function eventJsonLd(slug: string, data: EventData, site: URL) {
   const day = data.date.toISOString().split("T")[0];
   const at = (time: string) => `${day}T${time}:00${londonOffset(day, time)}`;
-  const pageUrl = new URL(`/events/${slug}`, site).href;
+  const pageUrl = new URL(`/events/${slug}/`, site).href;
   const band = {
     "@type": "MusicGroup",
     name: "Mad Robin Ceilidh Band",
