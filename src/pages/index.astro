@@ -55,10 +55,16 @@ function getYouTubeId(url: string): string | null {
 const showreelVideoId = getYouTubeId(siteSettings.showreelUrl || "");
 
 
-const title =
-  "Mad Robin — Live Ceilidh & Early English Music in Devon & the Southwest";
+const title = "Mad Robin | Ceilidh Band & Public Ceilidhs in Exeter, Devon";
 const description =
-  "Mad Robin are a live English ceilidh band and early music ensemble based in Exeter, Devon. Book us for weddings, private parties & public ceilidhs.";
+  "Exeter ceilidh band with caller for weddings, parties & barn dances across Devon. Come and dance at our public ceilidhs in Exeter: no experience or partner needed.";
+
+// Social profiles, so Google ties the site to the band's other pages.
+const sameAs = [
+  siteSettings.socialLinks?.facebook,
+  siteSettings.socialLinks?.instagram,
+  siteSettings.socialLinks?.youtube,
+].filter(Boolean);
 
 const eventsJsonLd = upcomingEvents.map((e) => eventJsonLd(e.id, e.data, Astro.site!));
 
@@ -69,6 +75,7 @@ const jsonLd = JSON.stringify([
     name: "Mad Robin Ceilidh Band",
     url: Astro.site!.href,
     description,
+    sameAs,
     genre: ["Ceilidh", "Folk", "English Country Dance", "Early English Music", "Playford"],
     areaServed: {
       "@type": "GeoCircle",
@@ -95,6 +102,7 @@ const jsonLd = JSON.stringify([
     name: "Mad Robin Ceilidh Band",
     url: Astro.site!.href,
     description,
+    sameAs,
     email: "madrobinband@gmail.com",
     telephone: "+44 7849 035551",
     areaServed: ["Devon", "Southwest England", "Exeter"],
@@ -145,7 +153,7 @@ const jsonLd = JSON.stringify([
         fetchpriority="high"
       />
     </div>
-    <h1 class="sr-only">Mad Robin</h1>
+    <h1 class="sr-only">Mad Robin — Ceilidh Band &amp; Public Ceilidhs in Exeter, Devon</h1>
     <div class="hero-bottom">
       <div class="container hero-bottom-inner">
         <p class="hero-tagline">
@@ -559,8 +567,8 @@ const jsonLd = JSON.stringify([
       <section class="section section--alt" id="events">
         <div class="container">
           <SectionHeading
-            title="Upcoming Events"
-            subtitle="Come see us live"
+            title="Public Ceilidhs in Exeter"
+            subtitle="Come and dance with us. No experience or partner needed"
           />
           <div class="events-grid">
           <SwipeCarousel id="carousel-events" label="Upcoming events" desktopGrid="1fr" cardMinWidth="92%">
