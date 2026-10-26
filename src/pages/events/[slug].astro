@@ -1,7 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import PageLayout from "@/layouts/PageLayout.astro";
-import { isEventPast } from "@/lib/events";
+import { isEventPast, eventJsonLd } from "@/lib/events";
 import SheetMusicLink from "@/components/ui/SheetMusicLink.astro";
 
 export async function getStaticPaths() {
@@ -19,6 +19,8 @@ const hasTicketing = data.ticketingEnabled && data.tiers && data.tiers.length > 
 // Past events are archived: kept reachable by direct link, but hidden from
 // search engines (noindex) and dropped from the sitemap (see astro.config.mjs).
 const isPast = isEventPast(data.date);
+// Past events get no Event markup: Google only shows upcoming ones.
+const jsonLd = isPast ? null : JSON.stringify(eventJsonLd(event.id, data, Astro.site!));
 const stripeKey = import.meta.env.STRIPE_PUBLISHABLE_KEY ?? "";
 
 const formattedDate = data.date.toLocaleDateString("en-GB", {
@@ -34,6 +36,7 @@ const formattedDate = data.date.toLocaleDateString("en-GB", {
   description={data.description}
   noindex={isPast}
 >
+  {jsonLd && <script slot="head" type="application/ld+json" set:html={jsonLd} />}
   <section class="event-hero">
     <div class="container container--narrow">
       <a href="/#events" class="back-link">&larr; All events</a>

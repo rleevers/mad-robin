@@ -56,7 +56,7 @@ export const GET: APIRoute = async () => {
       foldLine(`SUMMARY:${escapeIcs(title)}`),
       foldLine(`LOCATION:${escapeIcs(location)}`),
       foldLine(`DESCRIPTION:${descParts.join("\\n")}`),
-      "URL:https://madrobinceilidh.co.uk/#events",
+      "URL:https://madrobinband.co.uk/#events",
       "END:VEVENT",
     ].join("\r\n");
   });

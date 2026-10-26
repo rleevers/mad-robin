@@ -68,7 +68,7 @@ export const GET: APIRoute = async ({ params }) => {
     foldLine(`SUMMARY:${escapeIcs(title)}`),
     foldLine(`LOCATION:${escapeIcs(location)}`),
     foldLine(`DESCRIPTION:${descField}`),
-    "URL:https://madrobinceilidh.co.uk/#events",
+    "URL:https://madrobinband.co.uk/#events",
     "END:VEVENT",
     "END:VCALENDAR",
   ];

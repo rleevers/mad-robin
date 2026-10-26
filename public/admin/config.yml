@@ -26,7 +26,9 @@ collections:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false }
       - { label: "Start Time", name: "startTime", widget: "string", required: false, hint: "e.g. 19:30 — used for calendar links" }
+      - { label: "End Time", name: "endTime", widget: "string", required: false, hint: "e.g. 21:30 — leave blank to assume two hours after the start" }
       - { label: "Venue", name: "venue", widget: "string" }
+      - { label: "Venue Address", name: "address", widget: "string", required: false, hint: "Street address and postcode, e.g. 1 High Street, Exeter EX1 1AA — shown to Google so the event can appear in search" }
       - { label: "Map Link", name: "mapLink", widget: "string", required: false, hint: "Google Maps share link for the venue" }
       - { label: "Description", name: "description", widget: "text" }
       - { label: "Sheet Music PDF", name: "sheetMusicPdf", widget: "file", required: false, hint: "Upload a PDF, or leave blank until you have one. A 'Sheet Music' button appears on the event page once this is set — update it anytime, even from your phone at the event.", media_library: { config: { accept: ".pdf" } } }

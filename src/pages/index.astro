@@ -10,7 +10,7 @@ import heroLogo from "@/assets/images/logo.png";
 import heroBand from "@/assets/images/hero-band.jpg";
 import { getCollection, render } from "astro:content";
 import siteSettings from "@/data/settings/site.yml";
-import { isEventPast } from "@/lib/events";
+import { isEventPast, eventJsonLd } from "@/lib/events";
 
 // Fetch content
 const allTestimonials = await getCollection("testimonials");
@@ -60,33 +60,14 @@ const title =
 const description =
   "Mad Robin are a live English ceilidh band and early music ensemble based in Exeter, Devon. Book us for weddings, private parties & public ceilidhs.";
 
-const eventsJsonLd = upcomingEvents.map((e) => ({
-  "@context": "https://schema.org",
-  "@type": "Event",
-  name: e.data.title,
-  startDate: e.data.startTime
-    ? `${e.data.date.toISOString().split("T")[0]}T${e.data.startTime}:00`
-    : e.data.date.toISOString().split("T")[0],
-  location: {
-    "@type": "Place",
-    name: e.data.venue,
-    ...(e.data.address ? { address: e.data.address } : {}),
-  },
-  description: e.data.description,
-  organizer: {
-    "@type": "MusicGroup",
-    name: "Mad Robin Ceilidh Band",
-    url: "https://madrobinceilidh.co.uk",
-  },
-  url: "https://madrobinceilidh.co.uk/#events",
-}));
+const eventsJsonLd = upcomingEvents.map((e) => eventJsonLd(e.id, e.data, Astro.site!));
 
 const jsonLd = JSON.stringify([
   {
     "@context": "https://schema.org",
     "@type": "MusicGroup",
     name: "Mad Robin Ceilidh Band",
-    url: "https://madrobinceilidh.co.uk",
+    url: Astro.site!.href,
     description,
     genre: ["Ceilidh", "Folk", "English Country Dance", "Early English Music", "Playford"],
     areaServed: {
@@ -110,9 +91,9 @@ const jsonLd = JSON.stringify([
   {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    "@id": "https://madrobinceilidh.co.uk/#business",
+    "@id": new URL("/#business", Astro.site).href,
     name: "Mad Robin Ceilidh Band",
-    url: "https://madrobinceilidh.co.uk",
+    url: Astro.site!.href,
     description,
     email: "madrobinband@gmail.com",
     telephone: "+44 7849 035551",
@@ -648,7 +629,7 @@ const jsonLd = JSON.stringify([
             <p class="events-subscribe-label">Subscribe to all events</p>
             <div class="events-subscribe-links">
               <a
-                href={`https://calendar.google.com/calendar/r?cid=${encodeURIComponent("https://madrobinceilidh.co.uk/events/feed.ics")}`}
+                href={`https://calendar.google.com/calendar/r?cid=${encodeURIComponent(new URL("/events/feed.ics", Astro.site).href)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 class="cal-btn"
@@ -663,7 +644,7 @@ const jsonLd = JSON.stringify([
                 GCal
               </a>
               <a
-                href="webcal://madrobinceilidh.co.uk/events/feed.ics"
+                href={`webcal://${Astro.site!.host}/events/feed.ics`}
                 class="cal-btn"
                 aria-label="Subscribe via iCal or Outlook"
               >
