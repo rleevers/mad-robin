@@ -5,6 +5,10 @@
 [functions]
   directory = "netlify/functions"
 
+# Keep the Supabase free project from pausing between gigs
+[functions."supabase-keepalive"]
+  schedule = "@daily"
+
 # API routes → Netlify Functions
 [[redirects]]
   from = "/api/event-availability"
