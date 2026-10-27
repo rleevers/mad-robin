@@ -22,6 +22,7 @@ async function syncEvents() {
   }
 
   const markdownFiles = files.filter((f) => f.endsWith(".md"));
+  let failed = 0;
 
   for (const file of markdownFiles) {
     const slug = file.replace(".md", "");
@@ -38,13 +39,20 @@ async function syncEvents() {
 
     if (error) {
       console.error(`[sync-events] Failed to sync ${slug}:`, error.message);
+      failed++;
     } else {
       console.log(`[sync-events] Synced: ${slug} (capacity: ${capacity})`);
     }
+  }
+
+  // Fail the deploy rather than publish events whose tickets can't be sold
+  // (e.g. Supabase paused). The previous deploy stays live meanwhile.
+  if (failed > 0) {
+    throw new Error(`${failed} event(s) failed to sync to Supabase`);
   }
 }
 
 syncEvents().catch((err) => {
   console.error("[sync-events] Fatal error:", err.message);
-  process.exit(0);
+  process.exit(1);
 });

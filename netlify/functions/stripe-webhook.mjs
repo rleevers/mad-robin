@@ -33,7 +33,14 @@ export const handler = async (event) => {
       .eq("stripe_payment_intent_id", paymentIntent.id)
       .single();
 
-    if (fetchErr || !order) {
+    // A database failure (anything but "no matching row") returns 500 so
+    // Stripe retries; otherwise a paid order would never be confirmed.
+    if (fetchErr && fetchErr.code !== "PGRST116") {
+      console.error("Failed to look up order:", fetchErr);
+      return { statusCode: 500, body: "Failed to look up order" };
+    }
+
+    if (!order) {
       console.error("Order not found for PaymentIntent:", paymentIntent.id);
       return { statusCode: 200, body: JSON.stringify({ received: true }) };
     }
