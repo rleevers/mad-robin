@@ -72,7 +72,7 @@ const formattedDate = data.date.toLocaleDateString("en-GB", {
         </div>
       )}
 
-      {hasTicketing && data.tiers && (
+      {(hasTicketing || data.ticketUrl) && data.tiers && (
         <p class="event-price-line">
           {data.tiers.map((t, i) => (
             <span>
@@ -180,6 +180,10 @@ const formattedDate = data.date.toLocaleDateString("en-GB", {
         </>
       ) : isPast ? (
         <p class="past-note">This event has already taken place.</p>
+      ) : data.ticketUrl ? (
+        <a href={data.ticketUrl} class="btn btn--primary btn--lg" target="_blank" rel="noopener noreferrer">
+          Get Tickets &rarr;
+        </a>
       ) : (
         <p class="past-note">Tickets are not available for this event.</p>
       )}

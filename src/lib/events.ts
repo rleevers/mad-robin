@@ -18,6 +18,7 @@ type EventData = {
   address?: string;
   description: string;
   tiers?: { name: string; price: number }[];
+  ticketUrl?: string;
 };
 
 // UK offset ("+00:00" GMT / "+01:00" BST) for a local date and time, so
@@ -81,7 +82,7 @@ export function eventJsonLd(slug: string, data: EventData, site: URL) {
             price: t.price.toFixed(2),
             priceCurrency: "GBP",
             availability: "https://schema.org/InStock",
-            url: pageUrl,
+            url: data.ticketUrl ?? pageUrl,
           })),
         }
       : {}),

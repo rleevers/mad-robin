@@ -14,6 +14,7 @@ const events = defineCollection({
     endTime: z.string().optional(),
     sheetMusicPdf: z.string().optional(),
     ticketingEnabled: z.boolean().optional(),
+    ticketUrl: z.string().url().optional(),
     capacity: z.number().int().positive().optional(),
     tiers: z.array(z.object({ name: z.string(), price: z.number() })).optional(),
   }),
