@@ -5,6 +5,7 @@
 :root {
   --font-heading: "Playfair Display", Georgia, "Times New Roman", serif;
   --font-body: "Lato", "Helvetica Neue", Arial, sans-serif;
+  --font-accent: "Alegreya", Georgia, "Times New Roman", serif;
 
   /* Type scale (mobile-first) */
   --text-xs: 0.75rem;

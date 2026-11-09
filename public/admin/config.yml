@@ -55,9 +55,13 @@ collections:
       - label: "Event Type"
         name: "eventType"
         widget: "select"
+        required: false
         options: ["Wedding", "Corporate", "Private Party", "Public Ceilidh", "Other"]
       - { label: "Venue", name: "venue", widget: "string", required: false }
-      - { label: "Featured", name: "featured", widget: "boolean", default: false }
+      - { label: "Stars (1-5)", name: "rating", widget: "number", value_type: "int", min: 1, max: 5, required: false }
+      - { label: "Source", name: "source", widget: "string", required: false, hint: "e.g. Google" }
+      - { label: "Show on homepage", name: "featured", widget: "boolean", default: true }
+      - { label: "Sort Order", name: "sortOrder", widget: "number", default: 0, value_type: "int" }
       - { label: "Quote", name: "body", widget: "markdown" }
 
   # ============ Gallery ============
@@ -70,6 +74,7 @@ collections:
     sortable_fields: ["title", "sortOrder", "category"]
     fields:
       - { label: "Title", name: "title", widget: "string", hint: "Label for this item (shown in CMS list only, not on the website)" }
+      - { label: "Description", name: "alt", widget: "string", required: false, hint: "What the photo shows, for screen readers and search engines" }
       - { label: "Image", name: "image", widget: "image", required: false, hint: "Thumbnail for the gallery grid. Optional if uploading a video." }
       - { label: "Video", name: "video", widget: "file", required: false, hint: "Optional MP4 video. Keep under 50 MB.", media_library: { config: { accept: ".mp4" } } }
       - label: "Category"
@@ -90,17 +95,6 @@ collections:
       - { label: "Photo", name: "photo", widget: "image", required: false }
       - { label: "Sort Order", name: "sortOrder", widget: "number", default: 0, value_type: "int" }
       - { label: "Bio", name: "body", widget: "markdown" }
-
-  # ============ What to Expect ============
-  - name: "what-to-expect"
-    label: "What to Expect"
-    folder: "src/content/what-to-expect"
-    create: true
-    slug: "{{slug}}"
-    fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Sort Order", name: "sortOrder", widget: "number", default: 0, value_type: "int" }
-      - { label: "Body", name: "body", widget: "markdown" }
 
   # ============ FAQ ============
   - name: "faq"
@@ -123,8 +117,6 @@ collections:
         fields:
           - { label: "Email", name: "email", widget: "string" }
           - { label: "Phone", name: "phone", widget: "string" }
-          - { label: "Phone Note", name: "phoneNote", widget: "string", hint: "Shown below the phone number, e.g. 'Please leave a message'" }
-          - { label: "Response Promise", name: "responsePromise", widget: "string" }
           - { label: "Showreel URL", name: "showreelUrl", widget: "string", required: false, hint: "Paste a YouTube link to embed on the homepage. Leave empty for the placeholder." }
           - label: "Social Links"
             name: "socialLinks"
