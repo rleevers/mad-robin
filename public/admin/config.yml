@@ -116,7 +116,6 @@ collections:
         file: "src/data/settings/site.yml"
         fields:
           - { label: "Email", name: "email", widget: "string" }
-          - { label: "Phone", name: "phone", widget: "string" }
           - { label: "Showreel URL", name: "showreelUrl", widget: "string", required: false, hint: "Paste a YouTube link to embed on the homepage. Leave empty for the placeholder." }
           - label: "Social Links"
             name: "socialLinks"
