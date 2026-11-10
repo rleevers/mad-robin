@@ -4,4 +4,4 @@ category: "General"
 sortOrder: 2
 ---
 
-Our caller walks everyone through every dance before the music starts.
+Our caller walks everyone through every dance before the music starts, so **no previous experience is needed!**
