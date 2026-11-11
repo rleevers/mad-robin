@@ -1,6 +1,6 @@
 ---
 /* ============================================
-   SectionHeading — Heading + subtitle + gold accent
+   SectionHeading — Heading + subtitle
    ============================================ */
 
 interface Props {
@@ -8,20 +8,28 @@ interface Props {
   subtitle?: string;
   align?: "left" | "center";
   tag?: "h1" | "h2" | "h3";
+  /** Hand-lettered image to show instead of the typed title (title stays as its alt text). */
+  image?: { src: string; width: number; height: number };
 }
 
-const { title, subtitle, align = "center", tag: Tag = "h2" } = Astro.props;
+const { title, subtitle, align = "center", tag: Tag = "h2", image } = Astro.props;
 ---
 
 <div class:list={["section-heading", `section-heading--${align}`]}>
-  <Tag>{title}</Tag>
+  <Tag>
+    {image ? (
+      <img src={image.src} alt={title} width={image.width} height={image.height} class="heading-lettering" />
+    ) : (
+      title
+    )}
+  </Tag>
   <span class="accent-line" aria-hidden="true"></span>
   {subtitle && <p class="subtitle">{subtitle}</p>}
 </div>
 
 <style>
   .section-heading {
-    margin-bottom: var(--space-2xl);
+    margin-bottom: var(--space-xl);
   }
 
   .section-heading--center {
@@ -32,6 +40,15 @@ const { title, subtitle, align = "center", tag: Tag = "h2" } = Astro.props;
     text-align: left;
   }
 
+  /* A touch larger than the typed headings: 1.25em of the heading's font size. */
+  .heading-lettering {
+    display: inline-block;
+    height: 1.25em;
+    width: auto;
+    vertical-align: bottom;
+  }
+
+  /* Placeholder: to be replaced with a sketch of a twig. */
   .accent-line {
     display: block;
     width: 60px;

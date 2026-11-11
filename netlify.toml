@@ -9,6 +9,17 @@
 [functions."supabase-keepalive"]
   schedule = "@daily"
 
+# The booking page moved from /book-us/ to /enquire/; keep old links working.
+[[redirects]]
+  from = "/book-us"
+  to = "/enquire/"
+  status = 301
+
+[[redirects]]
+  from = "/book-us/"
+  to = "/enquire/"
+  status = 301
+
 # API routes → Netlify Functions
 [[redirects]]
   from = "/api/event-availability"

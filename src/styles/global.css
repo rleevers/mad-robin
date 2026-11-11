@@ -140,16 +140,23 @@ ol {
   max-width: var(--container-narrow);
 }
 
+/* Gap between sections: each section supplies half of it. */
+:root {
+  --section-gap: var(--space-3xl);
+}
+
 .section {
-  padding-block: var(--space-3xl);
+  padding-block: calc(var(--section-gap) / 2);
 }
 
-.section--alt {
-  background-color: var(--color-bg-secondary);
+/* The hero, header and footer don't supply their half, so these do. */
+.hero + .section,
+main > .section:first-child {
+  padding-top: var(--section-gap);
 }
 
-.section--warm {
-  background-color: var(--color-bg-tertiary);
+main > .section:last-child {
+  padding-bottom: var(--section-gap);
 }
 
 .sr-only {
@@ -192,8 +199,8 @@ ol {
 }
 
 @media (min-width: 768px) {
-  .section {
-    padding-block: var(--space-4xl);
+  :root {
+    --section-gap: var(--space-4xl);
   }
 }
 
