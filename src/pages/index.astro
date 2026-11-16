@@ -1,7 +1,6 @@
 ---
 import PageLayout from "@/layouts/PageLayout.astro";
 import SectionHeading from "@/components/ui/SectionHeading.astro";
-import Button from "@/components/ui/Button.astro";
 import SwipeCarousel from "@/components/ui/SwipeCarousel.astro";
 import CalendarButtons from "@/components/ui/CalendarButtons.astro";
 import { Image } from "astro:assets";
@@ -162,11 +161,6 @@ const jsonLd = JSON.stringify([
       />
     </div>
     <h1 class="sr-only">Mad Robin — Ceilidh Band &amp; Public Ceilidhs in Exeter, Devon</h1>
-    <div class="hero-bottom">
-      <div class="container hero-bottom-inner">
-        <Button href="/enquire/" size="lg">Enquire</Button>
-      </div>
-    </div>
   </section>
 
   <!-- ======== WELCOME ======== -->
@@ -521,27 +515,6 @@ const jsonLd = JSON.stringify([
     width: clamp(100px, 14vw, 220px);
     height: auto;
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
-  }
-
-  .hero-bottom {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 2;
-  }
-
-  .hero-bottom-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding-bottom: var(--space-2xl);
-  }
-
-  /* Hero Enquire button: same width and text size, less height. */
-  .hero-bottom-inner :global(.btn) {
-    padding-block: 0.55rem;
   }
 
   /* ---- What We Do ---- */
