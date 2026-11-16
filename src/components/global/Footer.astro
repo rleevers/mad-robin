@@ -3,6 +3,7 @@
    Footer — CTA strip, links, contact, copyright
    ============================================ */
 
+import Button from "@/components/ui/Button.astro";
 import siteSettings from "@/data/settings/site.yml";
 
 // Hand-drawn icons, shown at the sizes they were drawn relative to each other.
@@ -51,9 +52,8 @@ const currentPath = Astro.url.pathname;
         <h4 class="footer-heading">Quick Links</h4>
         <nav aria-label="Footer navigation">
           <a href="/#gallery" class="footer-link" {...(currentPath === "/" ? { "aria-current": "page" } : {})}>Gallery</a>
-          <a href="/#about" class="footer-link" {...(currentPath === "/" ? { "aria-current": "page" } : {})}>About the Band</a>
+          <a href="/#about" class="footer-link" {...(currentPath === "/" ? { "aria-current": "page" } : {})}>About Us</a>
           <a href="/#faq" class="footer-link" {...(currentPath === "/" ? { "aria-current": "page" } : {})}>FAQ</a>
-          <a href="/enquire/" class="footer-link" {...(currentPath.startsWith("/enquire/") ? { "aria-current": "page" } : {})}>Enquire</a>
         </nav>
       </div>
 
@@ -63,6 +63,7 @@ const currentPath = Astro.url.pathname;
         <address class="footer-contact">
           <a href={`mailto:${siteSettings.email}`} class="footer-link">{siteSettings.email}</a>
         </address>
+        <Button href="/enquire/" size="sm" class="footer-enquire">Enquire</Button>
       </div>
     </div>
   </div>
@@ -154,6 +155,10 @@ const currentPath = Astro.url.pathname;
     flex-direction: column;
     gap: var(--space-sm);
     font-style: normal;
+  }
+
+  .site-footer :global(.footer-enquire) {
+    margin-top: var(--space-lg);
   }
 
   /* Bottom bar */
