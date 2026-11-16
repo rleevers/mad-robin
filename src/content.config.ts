@@ -24,15 +24,14 @@ const testimonials = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./src/content/testimonials" }),
   schema: z.object({
     clientName: z.string(),
-    eventType: z.enum([
-      "Wedding",
-      "Corporate",
-      "Private Party",
-      "Public Ceilidh",
-      "Other",
-    ]),
+    eventType: z
+      .enum(["Wedding", "Corporate", "Private Party", "Public Ceilidh", "Other"])
+      .optional(),
     venue: z.string().optional(),
+    rating: z.number().int().min(1).max(5).optional(),
+    source: z.string().optional(),
     featured: z.boolean().default(false),
+    sortOrder: z.number().default(0),
   }),
 });
 
@@ -40,6 +39,7 @@ const gallery = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./src/content/gallery" }),
   schema: z.object({
     title: z.string(),
+    alt: z.string().optional(),
     image: z.string().optional(),
     video: z.string().optional(),
     category: z.enum([
@@ -70,19 +70,10 @@ const faq = defineCollection({
   }),
 });
 
-const whatToExpect = defineCollection({
-  loader: glob({ pattern: "**/*.md", base: "./src/content/what-to-expect" }),
-  schema: z.object({
-    title: z.string(),
-    sortOrder: z.number().default(0),
-  }),
-});
-
 export const collections = {
   events,
   testimonials,
   gallery,
   members,
   faq,
-  whatToExpect,
 };

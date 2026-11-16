@@ -6,14 +6,14 @@ import siteSettings from "@/data/settings/site.yml";
 
 <PageLayout
   title="Enquiry Sent — Mad Robin Band"
-  description={`Thank you for your enquiry. ${siteSettings.responsePromise}.`}
+  description={"Thank you for your enquiry."}
   noindex={true}
 >
   <section class="success-section">
     <div class="container container--narrow success-inner">
       <div class="success-icon" aria-hidden="true">✓</div>
       <h1>Thank you!</h1>
-      <p>Your enquiry has been sent. {siteSettings.responsePromise}.</p>
+      <p>Your enquiry has been sent.</p>
       <p class="success-sub">
         In the meantime, feel free to explore our site or drop us an email at
         <a href={`mailto:${siteSettings.email}`}>{siteSettings.email}</a>.

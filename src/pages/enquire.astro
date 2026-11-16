@@ -2,62 +2,19 @@
 import PageLayout from "@/layouts/PageLayout.astro";
 import SectionHeading from "@/components/ui/SectionHeading.astro";
 import Button from "@/components/ui/Button.astro";
-import SwipeCarousel from "@/components/ui/SwipeCarousel.astro";
 import siteSettings from "@/data/settings/site.yml";
 const today = new Date().toISOString().split('T')[0];
-const title = "Book Mad Robin — Ceilidh & Early Music in Devon & the Southwest";
+const title = "Enquire | Mad Robin, Ceilidh Band in Exeter, Devon";
 const description =
-  "Check availability and book Mad Robin for your wedding, corporate event, or party. Packages from £800. Based in Exeter, Devon.";
+  "Check availability and book Mad Robin for your wedding, corporate event, or party. Based in Exeter, Devon.";
 ---
 
 <PageLayout title={title} description={description}>
-  <!-- ======== PAGE HEADER ======== -->
-  <section class="page-header section">
-    <div class="container">
-      <SectionHeading
-        tag="h1"
-        title="Book Us"
-        subtitle="Let's get your guests on the dance floor"
-      />
-    </div>
-  </section>
-
-  <!-- ======== WHAT'S INCLUDED ======== -->
-  <section class="section">
-    <div class="container container--narrow">
-      <SectionHeading title="What's Included" />
-      <SwipeCarousel id="carousel-included" label="What's included" desktopGrid="repeat(2, 1fr)" cardMinWidth="80%" class="included-grid">
-        <div class="included-item">
-          <strong>Live Music</strong>
-          <p>A 4-piece band playing lively traditional and contemporary ceilidh tunes</p>
-        </div>
-        <div class="included-item">
-          <strong>Experienced Caller</strong>
-          <p>Every dance is called and taught — your guests will be dancing in minutes</p>
-        </div>
-        <div class="included-item">
-          <strong>PA System</strong>
-          <p>Professional sound system suitable for your venue size</p>
-        </div>
-        <div class="included-item">
-          <strong>Travel</strong>
-          <p>Travel within Devon included. We cover the Southwest and beyond — just ask</p>
-        </div>
-        <div class="included-item">
-          <strong>Early Music Sets</strong>
-          <p>Playford and English folk tunes available as a concert or ambient performance</p>
-        </div>
-      </SwipeCarousel>
-    </div>
-  </section>
-
   <!-- ======== ENQUIRY FORM ======== -->
-  <section class="section section--warm" id="enquiry-form">
+  <section class="section" id="enquiry-form">
     <div class="container container--narrow">
-      <SectionHeading
-        title="Get in Touch"
-        subtitle={`Tell us about your event — ${siteSettings.responsePromise.toLowerCase()}`}
-      />
+      <SectionHeading tag="h1" title="Enquire" />
+      <p class="book-intro">We're a 5-piece band with a caller, and we bring our own PA.</p>
 
       <form
         name="enquiry"
@@ -116,7 +73,7 @@ const description =
         <div class="form-group">
           <label for="message">Message <span class="required">*</span></label>
           <textarea id="message" name="message" rows="5" required aria-required="true"
-            placeholder="Tell us about your event — what are you looking for?"></textarea>
+            placeholder="Tell us about your event"></textarea>
         </div>
 
         <div class="form-group">
@@ -145,39 +102,16 @@ const description =
         <strong>Email us</strong>
         <a href={`mailto:${siteSettings.email}`} class="contact-link">{siteSettings.email}</a>
       </div>
-      <div class="contact-item">
-        <strong>Call us</strong>
-        <a href={`tel:${siteSettings.phone.replace(/\s/g, "")}`} class="contact-link">{siteSettings.phone}</a>
-        <p class="response-promise">{siteSettings.phoneNote}</p>
-      </div>
-      <div class="contact-item">
-        <p class="response-promise">{siteSettings.responsePromise}</p>
-      </div>
     </div>
   </section>
 </PageLayout>
 
 <style>
   /* ---- Page header ---- */
-  .page-header {
-    padding-bottom: 0;
-  }
-
-  /* ---- What's included ---- */
-  .included-item {
-    padding: var(--space-lg);
-    border-left: 3px solid var(--color-accent-gold);
-  }
-
-  .included-item strong {
-    display: block;
-    margin-bottom: var(--space-xs);
+  .book-intro {
+    text-align: center;
     font-size: var(--text-lg);
-  }
-
-  .included-item p {
-    font-size: var(--text-sm);
-    margin: 0;
+    margin-bottom: var(--space-xl);
   }
 
   /* ---- Enquiry form ---- */
@@ -261,12 +195,6 @@ const description =
     font-weight: 700;
     color: var(--color-accent-gold);
     margin-top: var(--space-xs);
-  }
-
-  .response-promise {
-    font-size: var(--text-sm);
-    color: var(--color-text-muted);
-    font-style: italic;
   }
 
   /* ---- Responsive ---- */

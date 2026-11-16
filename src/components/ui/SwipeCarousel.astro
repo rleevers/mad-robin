@@ -100,11 +100,14 @@ const {
     }
 
     .carousel-dots :global(.carousel-dot) {
+      /* 8px dot with a 10px invisible tap area round it. content-box, or the
+         padding swallows the dot entirely. */
+      box-sizing: content-box;
       width: 8px;
       height: 8px;
       border-radius: 50%;
       border: none;
-      background: var(--color-border);
+      background-color: #9ba69b; /* inactive dot: dark enough to see on cream */
       cursor: pointer;
       padding: 10px;
       background-clip: content-box;
@@ -112,7 +115,7 @@ const {
     }
 
     .carousel-dots :global(.carousel-dot[aria-selected="true"]) {
-      background: var(--color-accent-gold);
+      background-color: var(--color-accent-gold); /* keeps the clip, so it stays a dot */
       transform: scale(1.3);
     }
 
@@ -163,7 +166,9 @@ const {
       const cards = Array.from(track.children).filter(
         (el) => (el as HTMLElement).style.display !== "none"
       ) as HTMLElement[];
-      if (cards.length === 0) return;
+      // No dots when there's nothing to swipe between.
+      dotsContainer.style.display = cards.length < 2 ? "none" : "";
+      if (cards.length < 2) return;
 
       // Build dots
       dotsContainer.innerHTML = "";

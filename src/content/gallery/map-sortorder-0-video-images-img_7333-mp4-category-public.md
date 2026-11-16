@@ -1,5 +1,6 @@
 ---
 title: Movie
+alt: "Video of Felix calling from the stage with the band playing behind him"
 image: /images/img-7346-cover.jpg
 video: /images/img_7333.mp4
 category: Public
