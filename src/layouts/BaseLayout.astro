@@ -34,6 +34,9 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
     <link rel="canonical" href={canonicalUrl} />
 
     {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <!-- Not for AI training. Search engines ignore these values; AI scrapers that honour them skip the page and its images. -->
+    <meta name="robots" content="noai, noimageai" />
+    <meta name="tdm-reservation" content="1" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
