@@ -1,6 +1,12 @@
 backend:
   name: git-gateway
   branch: main
+  # Talk to Git Gateway on the Netlify address, not madrobinband.co.uk.
+  # Cloudflare sits in front of the custom domain and adds request headers;
+  # Git Gateway rejects about 1 in 3 of those requests with "431 Request
+  # Header Fields Too Large", and Decap 3.12.2 then fails every save with
+  # "Cannot read properties of undefined (reading 'includes')".
+  gateway_url: "https://mad-robin-preview.netlify.app/.netlify/git"
 
 media_folder: "public/images"
 public_folder: "/images"
