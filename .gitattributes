@@ -1,0 +1,4 @@
+# Decap CMS (git-gateway) reads this file before every save, to check for
+# Git LFS / Netlify Large Media patterns. When the file is missing, Decap
+# 3.12.2 crashes with "Cannot read properties of undefined (reading 'includes')"
+# and nothing can be published. Keep this file, even if it stays empty of rules.
